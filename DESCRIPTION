@@ -1,6 +1,6 @@
 Package: netscanR
 Title: Scan the Network With arp-scan and Parse the Results
-Version: 0.0.0.9000
+Version: 0.0.0.9001
 Author: Stefan Lanz
 Maintainer: Stefan Lanz <slanz1137@gmail.com>
 Description: Scan the network with arp-scan and parse the results into a
@@ -9,3 +9,6 @@ License: MIT + file LICENSE
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.1
+Imports:
+    dplyr,
+    stringr
