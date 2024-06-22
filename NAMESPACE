@@ -3,4 +3,6 @@
 export(arp_scan_version)
 export(can_run_arp_scan)
 export(find_arp_scan)
+export(run_arp_scan)
 importFrom(dplyr,"%>%")
+importFrom(dplyr,.data)

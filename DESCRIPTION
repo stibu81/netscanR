@@ -13,4 +13,6 @@ Imports:
     dplyr,
     stringr,
     cli,
-    glue
+    glue,
+    rlang,
+    tidyr

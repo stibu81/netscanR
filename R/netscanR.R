@@ -1,9 +1,10 @@
 #' @keywords internal
 "_PACKAGE"
 
-#' @importFrom dplyr %>%
+#' @importFrom dplyr %>% .data
 NULL
 
+globalVariables(".")
 
 
 #' Find the arp-scan Executable and Version
