@@ -34,13 +34,13 @@ run_arp_scan_ <- function(localnet, interface,
 
   command <- "arp-scan"
 
-  # if localnet is FALSE, host must be given
+  # if localnet is FALSE, host must be provided
   if (is.null(hosts) && !localnet) {
     cli::cli_abort("Either provide hosts or set localnet to TRUE.",
                    call = error_call)
   }
 
-  # add argument --localnet only if host is not given
+  # add argument --localnet only if host is not provided
   if (localnet && is.null(hosts)) {
     command <- paste0(command, " --localnet")
   }
@@ -93,7 +93,9 @@ parse_ip_data <- function(arp_scan_output) {
                     fill = "right") %>%
     # some vendors are put inside parenthesis => remove the parenthesis
     dplyr::mutate(vendor = rm_parenthesis(.data$vendor)) %>%
-    # some lines are duplicates => remove them
+    # according to https://www.royhills.co.uk/wiki/index.php/Arp-scan_User_Guide#Duplicate_ARP_replies,
+    # some devices send two replies to a single ARP request for unknown reasons.
+    # => remove duplicates
     dplyr::distinct(.data$ip, .data$mac, .keep_all = TRUE)
 
 }
