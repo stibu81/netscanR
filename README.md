@@ -4,6 +4,8 @@
 # netscanR
 
 <!-- badges: start -->
+
+[![R-CMD-check](https://github.com/stibu81/netscanR/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/stibu81/netscanR/actions/workflows/R-CMD-check.yaml)
 <!-- badges: end -->
 
 Scan network with arp-scan and parse results with R
