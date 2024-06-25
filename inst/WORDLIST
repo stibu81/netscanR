@@ -1,7 +1,6 @@
 CIDR
+CMD
 SUID
 arp
-hostnames
-loopback
 setuid
 tibble
