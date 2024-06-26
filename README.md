@@ -6,6 +6,8 @@
 <!-- badges: start -->
 
 [![R-CMD-check](https://github.com/stibu81/netscanR/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/stibu81/netscanR/actions/workflows/R-CMD-check.yaml)
+[![Codecov test
+coverage](https://codecov.io/gh/stibu81/netscanR/branch/main/graph/badge.svg)](https://app.codecov.io/gh/stibu81/netscanR?branch=main)
 <!-- badges: end -->
 
 Scan network with arp-scan and parse results with R
