@@ -22,8 +22,8 @@ run_arp_scan <- function(localnet = TRUE,
                          hosts = NULL,
                          verbose = FALSE) {
 
-  run_arp_scan_(localnet, interface, hosts, verbose) %>%
-    parse_arp_scan(verbose = verbose)
+  arp_scan_output <- run_arp_scan_(localnet, interface, hosts, verbose)
+  parse_arp_scan(arp_scan_output, verbose = verbose)
 
 }
 
@@ -53,12 +53,23 @@ run_arp_scan_ <- function(localnet, interface,
     command <- paste0(command, " ", paste(hosts, collapse = " "))
   }
 
-  system(command, intern = TRUE)
+  # if the command fails, system() produces a warning that is not useful
+  suppressWarnings(
+    system(paste(command, "2>&1"), intern = TRUE)
+  )
 
 }
 
 
-parse_arp_scan <- function(arp_scan_output, verbose) {
+parse_arp_scan <- function(arp_scan_output,
+                           verbose,
+                           error_call = rlang::caller_env()) {
+
+  success <- check_errors(arp_scan_output, error_call = error_call)
+
+  if (verbose && success) {
+    cli::cli_alert_success("arp-scan was successful")
+  }
 
   other_data <- parse_other(arp_scan_output)
 
@@ -126,4 +137,35 @@ parse_other <- function(arp_scan_output) {
 
   list(if_name = if_name, if_mac = if_mac, if_ip = if_ip,
        n_scanned = n_scanned, scan_time = scan_time)
+}
+
+
+check_errors <- function(arp_scan_output, error_call = rlang::caller_env()) {
+
+  #browser()
+
+  # if an error occured, there is an atttribute "status" that has a value > 0
+  status <- attr(arp_scan_output, "status")
+  if (!is.null(status) && status > 0L) {
+    # print the output from arp-scan as message since these are presumably
+    # error messages
+    cli::cli_abort(
+      c("arp-scan failed", format_arp_scan_errors(arp_scan_output)),
+      call = error_call
+    )
+  }
+
+  TRUE
+}
+
+
+format_arp_scan_errors <- function(arp_scan_output) {
+  # some arp-scan messages are marked by "WARNING" or "ERROR" => use
+  # appropriate cli-style
+  cli_names <- dplyr::case_when(
+    stringr::str_detect(arp_scan_output, "^WARNING") ~ "!",
+    stringr::str_detect(arp_scan_output, "^ERROR") ~"x",
+    .default = "i"
+  )
+  rlang::set_names(arp_scan_output, cli_names)
 }

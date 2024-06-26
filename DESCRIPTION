@@ -1,6 +1,6 @@
 Package: netscanR
 Title: Scan the Network With arp-scan and Parse the Results
-Version: 0.0.0.9003
+Version: 0.0.0.9004
 Author: Stefan Lanz
 Maintainer: Stefan Lanz <slanz1137@gmail.com>
 Description: Scan the network with arp-scan and parse the results into a
