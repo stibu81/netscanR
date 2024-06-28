@@ -142,8 +142,6 @@ parse_other <- function(arp_scan_output) {
 
 check_errors <- function(arp_scan_output, error_call = rlang::caller_env()) {
 
-  #browser()
-
   # if an error occured, there is an atttribute "status" that has a value > 0
   status <- attr(arp_scan_output, "status")
   if (!is.null(status) && status > 0L) {
