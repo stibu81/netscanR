@@ -171,5 +171,8 @@ format_arp_scan_errors <- function(arp_scan_output) {
     stringr::str_detect(arp_scan_output, "^ERROR") ~"x",
     .default = "i"
   )
+  # in case of an error, arp_scan_output has some attributes that should not
+  # be part of the formatted output => strip all attributes
+  attributes(arp_scan_output) <- NULL
   rlang::set_names(arp_scan_output, cli_names)
 }
