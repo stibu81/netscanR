@@ -1,5 +1,5 @@
 Package: netscanR
-Title: Scan the Network With arp-scan and Parse the Results
+Title: Scan the Local Network with R
 Version: 0.0.0.9007
 Author: Stefan Lanz
 Maintainer: Stefan Lanz <slanz1137@gmail.com>

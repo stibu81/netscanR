@@ -4,8 +4,9 @@
 \name{netscanR-package}
 \alias{netscanR}
 \alias{netscanR-package}
-\title{netscanR: Scan the Network With arp-scan and Parse the Results}
+\title{netscanR: Scan the Local Network with R}
 \description{
-Scan the network with arp-scan and parse the results into a tibble.
+netscanR allows you to scan your local network using \code{arp-scan}.
+Output from \code{arp-scan} is parsed into a tibble that can be analysed using R.
 }
 \keyword{internal}

@@ -21,7 +21,13 @@ knitr::opts_chunk$set(
 coverage](https://codecov.io/gh/stibu81/netscanR/branch/main/graph/badge.svg)](https://app.codecov.io/gh/stibu81/netscanR?branch=main)
 <!-- badges: end -->
 
-Scan network with arp-scan and parse results with R 
+
+## About
+
+netscanR is an R package that allows you to scan your local network using
+`arp-scan`. Output from `arp-scan` is parsed into a tibble that can be
+analysed using R.
+
 
 ## Installation
 
@@ -32,4 +38,54 @@ You can install the development version of netscanR from
 # install.packages("devtools")
 devtools::install_github("stibu81/netscanR")
 ```
+
+
+## Setting up `arp-scan`
+
+`arp-scan` must be installed in order for netscanR to work. You can check that
+the command can be found by running
+
+```{r}
+library(netscanR)
+find_arp_scan()
+```
+
+If `arp-scan` is not found, an empty string is returned. On Linux, you
+can usually install `arp-scan` from the official package repositories.
+For example, on Debian, Ubuntu and derivatives, you can run
+
+``` bash
+sudo apt install arp-scan
+```
+
+`arp-scan` should also run on any other Linux  distribution, macOS, FreeBDS
+and others (see the
+[arp-scan GitHub readme](https://github.com/royhills/arp-scan?tab=readme-ov-file#building-and-installing-from-source)),
+and once it is installed, netscanR might be able to run. However, this has only
+been tested on Ubuntu.
+
+The version of `arp-scan` can be obtained from R using
+
+```{r}
+arp_scan_version()
+```
+
+If `arp-scan` is not found, the returned version is 0.
+
+netscanR has only been tested with `arp-scan` version 1.9.7.
+
+
+## Usage
+
+Once `arp-scan` is installed, you can scan the local network from R using
+
+```{r eval=FALSE}
+run_arp_scan()
+```
+<!-- in order not to disclose any private information, the test data is used
+here instead of an actual call of run_arp_scan() -->
+```{r echo=FALSE}
+netscanR:::parse_arp_scan(netscanR:::get_arp_scan_test_output())
+```
+
 
