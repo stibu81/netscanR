@@ -1,5 +1,20 @@
 library(dplyr, warn.conflicts = FALSE)
 
+
+test_that("test get_arp_scan_command()", {
+  expect_equal(get_arp_scan_command(), "arp-scan --localnet 2>&1")
+  expect_equal(get_arp_scan_command(hosts = "192.168.1.234"),
+               "arp-scan 192.168.1.234 2>&1")
+  expect_equal(get_arp_scan_command(interface = "wlp6s0"),
+               "arp-scan --localnet --interface wlp6s0 2>&1")
+  expect_equal(get_arp_scan_command(hosts = "192.168.1.23",
+                                    interface = "wlp6s0"),
+               "arp-scan --interface wlp6s0 192.168.1.23 2>&1")
+  expect_error(run_arp_scan(localnet = FALSE),
+               "Either provide hosts or set localnet to TRUE.")
+})
+
+
 test_that("test run_arp_scan()", {
   skip_on_ci()
   skip_on_cran()
@@ -36,8 +51,7 @@ arp_scan_ref <- tibble(
 )
 
 test_that("test parse_arp_scan()", {
-  expect_equal(parse_arp_scan(arp_scan_output, verbose = FALSE),
-               arp_scan_ref)
+  expect_equal(parse_arp_scan(arp_scan_output), arp_scan_ref)
   parse_arp_scan(arp_scan_output, verbose = TRUE) %>%
     expect_message("arp-scan was successful") %>%
     expect_message("Interface: wlp6s0") %>%
@@ -52,8 +66,7 @@ arp_scan_output <- "some error"
 attr(arp_scan_output, "status") <- 1L
 
 test_that("test parse_arp_scan() with error", {
-  expect_error(parse_arp_scan(arp_scan_output, verbose = FALSE),
-               "some error")
+  expect_error(parse_arp_scan(arp_scan_output), "some error")
 })
 
 

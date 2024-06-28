@@ -22,15 +22,22 @@ run_arp_scan <- function(localnet = TRUE,
                          hosts = NULL,
                          verbose = FALSE) {
 
-  arp_scan_output <- run_arp_scan_(localnet, interface, hosts, verbose)
+  arp_scan_command <- get_arp_scan_command(localnet, interface, hosts)
+
+  # if the command fails, system() produces a warning that is not useful
+  suppressWarnings(
+    arp_scan_output <- system(arp_scan_command, intern = TRUE)
+  )
+
   parse_arp_scan(arp_scan_output, verbose = verbose)
 
 }
 
 
-run_arp_scan_ <- function(localnet, interface,
-                          hosts, verbose,
-                          error_call = rlang::caller_env()) {
+get_arp_scan_command <- function(localnet = TRUE,
+                                 interface = NULL,
+                                 hosts = NULL,
+                                 error_call = rlang::caller_env()) {
 
   command <- "arp-scan"
 
@@ -53,16 +60,15 @@ run_arp_scan_ <- function(localnet, interface,
     command <- paste0(command, " ", paste(hosts, collapse = " "))
   }
 
-  # if the command fails, system() produces a warning that is not useful
-  suppressWarnings(
-    system(paste(command, "2>&1"), intern = TRUE)
-  )
+  # redirect standard error to standard output such that it can also be
+  # captured by R
+  paste(command, "2>&1")
 
 }
 
 
 parse_arp_scan <- function(arp_scan_output,
-                           verbose,
+                           verbose = FALSE,
                            error_call = rlang::caller_env()) {
 
   success <- check_errors(arp_scan_output, error_call = error_call)
