@@ -42,7 +42,7 @@ jobs:
 
       - name: Install arp-scan
         if: matrix.config.os == 'ubuntu-latest'
-        run: apt-get install -y arp-scan
+        run: sudo apt-get install -y arp-scan
 
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:

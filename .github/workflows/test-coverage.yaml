@@ -24,7 +24,7 @@ jobs:
           use-public-rspm: true
 
       - name: Install arp-scan
-        run: apt-get install -y arp-scan
+        run: sudo apt-get install -y arp-scan
 
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
