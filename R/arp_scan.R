@@ -30,6 +30,10 @@ run_arp_scan <- function(localnet = TRUE,
                          hosts = NULL,
                          verbose = FALSE) {
 
+  if (find_arp_scan() == "") {
+    cli::cli_abort("arp-scan not found.")
+  }
+
   arp_scan_command <- get_arp_scan_command(localnet, interface, hosts)
 
   # if the command fails, system() produces a warning that is not useful
