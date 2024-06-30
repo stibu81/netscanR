@@ -17,11 +17,11 @@ globalVariables(".")
 #' Find the path to the arp-scan executable and the version of arp-scan.
 #'
 #' @returns
-#' `find_arp_scan()` returns the path to the arp-scan executable as a character.
+#' `find_arp_scan()` returns the path to the `arp-scan` executable as a character.
 #' If it is not found, an empty character is returned.
 #'
-#' `arp_scan_version()` returns the version of arp-scan as a `numeric_version`.
-#' It returns '0', if arp-scan is not found.
+#' `arp_scan_version()` returns the version of `arp-scan` as a `numeric_version`.
+#' It returns '0', if `arp-scan` is not found.
 #'
 #' @export
 

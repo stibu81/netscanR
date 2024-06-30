@@ -2,7 +2,7 @@
 % Please edit documentation in R/arp_scan.R
 \name{run_arp_scan}
 \alias{run_arp_scan}
-\title{Scan the Network with arp-scan}
+\title{Scan the Network with \code{arp-scan}}
 \usage{
 run_arp_scan(localnet = TRUE, interface = NULL, hosts = NULL, verbose = FALSE)
 }
@@ -26,5 +26,13 @@ If \code{hosts} is provided, \code{localnet} is ignored.}
 \item{verbose}{logical, should additional output be printed to the console?}
 }
 \description{
-Scan the Network with arp-scan
+Scan the Network with \code{arp-scan}
+}
+\details{
+\code{arp-scan} must be installed on the system for this function to work. Use
+\code{\link[=find_arp_scan]{find_arp_scan()}} to check whether this is the case. Also, root privileges
+are required to run \code{arp-scan}. So, either R must be run as root or the
+setuid must be set on the \code{arp-scan} executable (see the documentation of
+\code{\link[=can_run_arp_scan]{can_run_arp_scan()}} for more information). Use \code{can_run_arp_scan()} to
+check whether the current user has the necessary privileges.
 }

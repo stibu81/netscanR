@@ -1,4 +1,4 @@
-#' Scan the Network with arp-scan
+#' Scan the Network with `arp-scan`
 #'
 #' @param localnet logical, should the local network be scanned by adding
 #' the argument `--localnet` to the command? This argument is ignored if
@@ -14,6 +14,14 @@
 #' (e.g. "192.168.1.0:255.255.255.0").
 #' If `hosts` is provided, `localnet` is ignored.
 #' @param verbose logical, should additional output be printed to the console?
+#'
+#' @details
+#' `arp-scan` must be installed on the system for this function to work. Use
+#' [`find_arp_scan()`] to check whether this is the case. Also, root privileges
+#' are required to run `arp-scan`. So, either R must be run as root or the
+#' setuid must be set on the `arp-scan` executable (see the documentation of
+#' [`can_run_arp_scan()`] for more information). Use `can_run_arp_scan()` to
+#' check whether the current user has the necessary privileges.
 #'
 #' @export
 

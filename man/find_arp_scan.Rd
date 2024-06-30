@@ -10,11 +10,11 @@ find_arp_scan()
 arp_scan_version()
 }
 \value{
-\code{find_arp_scan()} returns the path to the arp-scan executable as a character.
+\code{find_arp_scan()} returns the path to the \code{arp-scan} executable as a character.
 If it is not found, an empty character is returned.
 
-\code{arp_scan_version()} returns the version of arp-scan as a \code{numeric_version}.
-It returns '0', if arp-scan is not found.
+\code{arp_scan_version()} returns the version of \code{arp-scan} as a \code{numeric_version}.
+It returns '0', if \code{arp-scan} is not found.
 }
 \description{
 Find the path to the arp-scan executable and the version of arp-scan.
