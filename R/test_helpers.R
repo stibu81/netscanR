@@ -18,7 +18,8 @@ get_arp_scan_test_output <- function(error = FALSE) {
       "192.168.1.178\tee:44:eb:bf:01:9a\t(Unknown: locally administered)",
       "192.168.1.83\t72:73:b3:17:d4:ac\t(Unknown: locally administered)",
       "192.168.1.111\tda:13:54:95:ab:63\t(Unknown: locally administered)",
-      "192.168.1.239\tf4:b5:d1:36:5e:32\t(Unknown)", "",
+      "192.168.1.239\tf4:b5:d1:36:5e:32\t(Unknown)",
+      "192.168.1.23\t3d:3d:22:38:4d:ae\tACME, Inc. (DUP: 2)", "",
       "8 packets received by filter, 0 packets dropped by kernel",
       "Ending arp-scan 1.9.7: 256 hosts scanned in 2.122 seconds (120.64 hosts/sec). 8 responded"
     )
