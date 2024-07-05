@@ -10,7 +10,7 @@ test_that("test get_arp_scan_command()", {
   expect_equal(get_arp_scan_command(hosts = "192.168.1.23",
                                     interface = "wlp6s0"),
                "arp-scan --interface wlp6s0 192.168.1.23 2>&1")
-  expect_error(run_arp_scan(localnet = FALSE),
+  expect_error(get_arp_scan_command(localnet = FALSE),
                "Either provide hosts or set localnet to TRUE.")
 })
 
