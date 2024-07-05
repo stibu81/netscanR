@@ -2,8 +2,10 @@ CIDR
 CMD
 Codecov
 FreeBDS
+IPv
 SUID
 arp
+ifconfig
 macOS
 setuid
 tibble

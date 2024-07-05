@@ -23,8 +23,8 @@ jobs:
         with:
           use-public-rspm: true
 
-      - name: Install arp-scan
-        run: sudo apt-get install -y arp-scan
+      - name: Install arp-scan & ifconfig
+        run: sudo apt-get install -y arp-scan net-tools
 
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:

@@ -40,9 +40,9 @@ jobs:
           http-user-agent: ${{ matrix.config.http-user-agent }}
           use-public-rspm: true
 
-      - name: Install arp-scan
+      - name: Install arp-scan & ifconfig
         if: matrix.config.os == 'ubuntu-latest'
-        run: sudo apt-get install -y arp-scan
+        run: sudo apt-get install -y arp-scan net-tools
 
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
