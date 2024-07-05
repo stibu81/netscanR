@@ -25,6 +25,16 @@ If \code{hosts} is provided, \code{localnet} is ignored.}
 
 \item{verbose}{logical, should additional output be printed to the console?}
 }
+\value{
+a tibble with the following columns:
+\itemize{
+\item \code{interface}: the name of the interface that was scanned
+\item \code{ip}: the IP address of the host
+\item \code{mac}: the MAC address of the host
+\item \code{vendor}: the vendor of the network card, which may differ from the
+manufacturer of the device
+}
+}
 \description{
 Scan the Network with \code{arp-scan}
 }

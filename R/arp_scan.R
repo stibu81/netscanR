@@ -23,6 +23,15 @@
 #' [`can_run_arp_scan()`] for more information). Use `can_run_arp_scan()` to
 #' check whether the current user has the necessary privileges.
 #'
+#' @returns
+#' a tibble with the following columns:
+#' * `interface`: the name of the interface that was scanned
+#' * `ip`: the IP address of the host
+#' * `mac`: the MAC address of the host
+#' * `vendor`: the vendor of the network card, which may differ from the
+#'   manufacturer of the device
+#'
+#'
 #' @export
 
 run_arp_scan <- function(localnet = TRUE,
