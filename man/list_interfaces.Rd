@@ -15,6 +15,8 @@ packet that can be transmitted
 \item \code{mac}: the MAC address of the interface
 \item \code{ipv4}: the IPv4 address that is currently assigned to the interface.
 This is \code{NA} if the interface is not connected.
+\item \code{netmask}: the subnet mask of the interface.
+This is \code{NA} if the interface is not connected.
 }
 }
 \description{

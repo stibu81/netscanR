@@ -14,6 +14,8 @@
 #' * `mac`: the MAC address of the interface
 #' * `ipv4`: the IPv4 address that is currently assigned to the interface.
 #'    This is `NA` if the interface is not connected.
+#' * `netmask`: the subnet mask of the interface.
+#'   This is `NA` if the interface is not connected.
 #'
 #' @export
 
@@ -73,7 +75,9 @@ parse_interface <- function(interface_txt) {
     mac = extract_by_pattern(interface_txt,
                              "(?<=ether) *([0-9a-f]{2}:){5}[0-9a-f]{2}"),
     ipv4 = extract_by_pattern(interface_txt,
-                              "(?<=inet) *(\\d{1,3}\\.){3}\\d{1,3}")
+                              "(?<=inet) *(\\d{1,3}\\.){3}\\d{1,3}"),
+    netmask = extract_by_pattern(interface_txt,
+                                 "(?<=netmask) *(\\d{1,3}\\.){3}\\d{1,3}")
   )
 }
 
