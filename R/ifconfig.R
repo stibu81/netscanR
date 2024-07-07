@@ -66,33 +66,25 @@ decompose_into_interfaces <- function(ifconfig_output) {
 
 
 parse_interface <- function(interface_txt) {
-
-  name <- stringr::str_extract(interface_txt[1], "[^:]+")
-  mtu <- stringr::str_extract(interface_txt[1], "(?<=mtu) *\\d+") %>%
-    as.integer
-
-  mac_txt <- stringr::str_subset(interface_txt, "ether")
-  mac <- if (length(mac_txt) == 0) {
-    NA_character_
-  } else {
-    mac_txt[1] %>%
-      stringr::str_extract("(?<=ether) *([0-9a-f]{2}:){5}[0-9a-f]{2}") %>%
-      stringr::str_trim()
-  }
-
-  ipv4_txt <- stringr::str_subset(interface_txt, "inet")
-  ipv4 <- if (length(ipv4_txt) == 0) {
-    NA_character_
-  } else {
-    ipv4_txt[1] %>%
-      stringr::str_extract("(?<=inet) *(\\d{1,3}\\.){3}\\d{1,3}") %>%
-      stringr::str_trim()
-  }
-
   dplyr::tibble(
-    name = name,
-    mtu = mtu,
-    mac = mac,
-    ipv4 = ipv4
+    name = extract_by_pattern(interface_txt, "^[^ :]+(?=:)"),
+    mtu = extract_by_pattern(interface_txt, "(?<=mtu) *\\d+") %>%
+      as.integer(),
+    mac = extract_by_pattern(interface_txt,
+                             "(?<=ether) *([0-9a-f]{2}:){5}[0-9a-f]{2}"),
+    ipv4 = extract_by_pattern(interface_txt,
+                              "(?<=inet) *(\\d{1,3}\\.){3}\\d{1,3}")
   )
+}
+
+
+extract_by_pattern <- function(txt, pattern) {
+  txt <- stringr::str_subset(txt, pattern)
+  if (length(txt) == 0) {
+    NA_character_
+  } else {
+    txt[1] %>%
+      stringr::str_extract(pattern) %>%
+      stringr::str_trim()
+  }
 }
