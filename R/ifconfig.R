@@ -73,11 +73,11 @@ parse_interface <- function(interface_txt) {
     mtu = extract_by_pattern(interface_txt, "(?<=mtu) *\\d+") %>%
       as.integer(),
     mac = extract_by_pattern(interface_txt,
-                             "(?<=ether) *([0-9a-f]{2}:){5}[0-9a-f]{2}"),
+                             paste0("(?<=ether) *", mac_pattern)),
     ipv4 = extract_by_pattern(interface_txt,
-                              "(?<=inet) *(\\d{1,3}\\.){3}\\d{1,3}"),
+                              paste0("(?<=inet) *", ip_pattern)),
     netmask = extract_by_pattern(interface_txt,
-                                 "(?<=netmask) *(\\d{1,3}\\.){3}\\d{1,3}")
+                                 paste0("(?<=netmask) *", ip_pattern))
   )
 }
 

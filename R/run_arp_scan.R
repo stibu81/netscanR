@@ -121,7 +121,7 @@ parse_ip_data <- function(arp_scan_output) {
 
   arp_scan_output %>%
     # extract the relevant lines: these start with an IP address
-    stringr::str_subset("^(\\d+\\.){3}\\d+") %>%
+    stringr::str_subset(paste0("^", ip_pattern)) %>%
     # convert to tibble and split into three columns
     dplyr::tibble(ip_data = .) %>%
     tidyr::separate("ip_data",
