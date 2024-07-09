@@ -5,6 +5,7 @@ FreeBDS
 IPv
 SUID
 arp
+csv
 ifconfig
 macOS
 setuid
