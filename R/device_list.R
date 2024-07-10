@@ -52,9 +52,11 @@ read_device_list <- function(file) {
     dev_list <- dplyr::mutate(dev_list, ip = NA_character_)
   }
 
-  # standardise the table: keep required columns in standard order
+  # standardise the table: keep required columns in standard order and convert
+  # mac to lower case
   dev_list <- dev_list  %>%
-    dplyr::select("mac", "description", "ip")
+    dplyr::select("mac", "description", "ip") %>%
+    dplyr::mutate(mac = tolower(.data$mac))
 
   # checks on the contents of the device list
   dev_list <- check_device_list(dev_list)

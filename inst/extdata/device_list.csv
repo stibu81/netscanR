@@ -1,8 +1,8 @@
 mac,description,ip
 b1:5b:92:b5:32:d8,Router,192.168.1.1
-da:13:54:95:ab:63,Laptop Frank,192.168.1.111
+DA:13:54:95:AB:63,Laptop Frank,192.168.1.111
 cc:c1:79:a5:f9:f1,Phone Peter,192.168.1.113
 ee:44:eb:bf:01:9a,Laptop Anna,192.168.1.178
-3d:3d:22:38:4d:ae,Tablet Peter,
+3D:3D:22:38:4D:AE,Tablet Peter,
 f4:b5:d1:36:5e:32,Printer,192.168.1.240
 72:73:b3:17:d4:ac,Phone Anna,192.168.1.83
