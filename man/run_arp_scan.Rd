@@ -4,7 +4,13 @@
 \alias{run_arp_scan}
 \title{Scan the Network with \code{arp-scan}}
 \usage{
-run_arp_scan(localnet = TRUE, interface = NULL, hosts = NULL, verbose = FALSE)
+run_arp_scan(
+  localnet = TRUE,
+  interface = NULL,
+  hosts = NULL,
+  device_list = NULL,
+  verbose = FALSE
+)
 }
 \arguments{
 \item{localnet}{logical, should the local network be scanned by adding
@@ -23,6 +29,10 @@ by a dash (e.g. "192.168.1.1-192.168.1.10") or an IP address with mask
 (e.g. "192.168.1.0:255.255.255.0").
 If \code{hosts} is provided, \code{localnet} is ignored.}
 
+\item{device_list}{character giving the path where the device list is
+stored as a csv-file or a tibble containing a device list. See
+\code{\link[=read_device_list]{read_device_list()}} for more information.}
+
 \item{verbose}{logical, should additional output be printed to the console?}
 }
 \value{
@@ -33,6 +43,18 @@ a tibble with the following columns:
 \item \code{mac}: the MAC address of the host
 \item \code{vendor}: the vendor of the network card, which may differ from the
 manufacturer of the device
+}
+
+If \code{device_list} is provided, the tibble contains three additional columns:
+\itemize{
+\item \code{description}: the description associated with the device from the
+device list. If no description is provided or if the device is not listed
+in the device list, this column is \code{NA}.
+\item \code{expected_ip}: a logical indicating whether the IP address of the device
+corresponds to the expected address given in the device list. If no
+IP is provided in the device list, this column is \code{NA}.
+\item \code{known_device}: a logical indicating whether the device is known, i.e.,
+whether its MAC address is contained in the device list.
 }
 }
 \description{

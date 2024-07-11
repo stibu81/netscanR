@@ -13,6 +13,9 @@
 #' by a dash (e.g. "192.168.1.1-192.168.1.10") or an IP address with mask
 #' (e.g. "192.168.1.0:255.255.255.0").
 #' If `hosts` is provided, `localnet` is ignored.
+#' @param device_list character giving the path where the device list is
+#' stored as a csv-file or a tibble containing a device list. See
+#' [`read_device_list()`] for more information.
 #' @param verbose logical, should additional output be printed to the console?
 #'
 #' @details
@@ -31,16 +34,32 @@
 #' * `vendor`: the vendor of the network card, which may differ from the
 #'   manufacturer of the device
 #'
+#' If `device_list` is provided, the tibble contains three additional columns:
+#' * `description`: the description associated with the device from the
+#'    device list. If no description is provided or if the device is not listed
+#'    in the device list, this column is `NA`.
+#' * `expected_ip`: a logical indicating whether the IP address of the device
+#'   corresponds to the expected address given in the device list. If no
+#'   IP is provided in the device list, this column is `NA`.
+#' * `known_device`: a logical indicating whether the device is known, i.e.,
+#'   whether its MAC address is contained in the device list.
 #'
 #' @export
 
 run_arp_scan <- function(localnet = TRUE,
                          interface = NULL,
                          hosts = NULL,
+                         device_list = NULL,
                          verbose = FALSE) {
 
   if (find_arp_scan() == "") {
     cli::cli_abort("arp-scan not found.")
+  }
+
+  # if device_list is a string, interpret it as a file path
+  # and read the file
+  if (is.character(device_list)) {
+    device_list <- read_device_list(device_list)
   }
 
   arp_scan_command <- get_arp_scan_command(localnet, interface, hosts)
@@ -50,7 +69,8 @@ run_arp_scan <- function(localnet = TRUE,
     arp_scan_output <- system(arp_scan_command, intern = TRUE)
   )
 
-  parse_arp_scan(arp_scan_output, verbose = verbose)
+  parse_arp_scan(arp_scan_output, verbose = verbose) %>%
+    apply_device_list(device_list)
 
 }
 
@@ -196,4 +216,19 @@ format_arp_scan_errors <- function(arp_scan_output) {
   # be part of the formatted output => strip all attributes
   attributes(arp_scan_output) <- NULL
   rlang::set_names(arp_scan_output, cli_names)
+}
+
+
+apply_device_list <- function(arp_scan_table, device_list) {
+
+  if (!is.null(device_list)) {
+    device_list <- device_list %>% dplyr::rename(expected_ip = "ip")
+    arp_scan_table <- arp_scan_table %>%
+      dplyr::left_join(device_list, by = "mac") %>%
+      dplyr::mutate(expected_ip = .data$ip == .data$expected_ip,
+                    known_device = .data$mac %in% device_list$mac)
+  }
+
+  arp_scan_table
+
 }
