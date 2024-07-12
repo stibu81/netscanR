@@ -30,3 +30,33 @@ is_ip <- function(x) {
   }
   ip_match
 }
+
+
+# ensure that a file name has the correct extension. Abort, if it has the
+# wrong extension, add the extension if there is none.
+
+file_name_with_ext <- function(file, ext, error_call = rlang::caller_env()) {
+
+  # ext must have length one
+  if (length(ext) != 1) {
+    cli::cli_abort("ext must have length one.", call = error_call)
+  }
+
+  # extract the extension in the file name
+  file_ext <- stringr::str_extract(file, "\\.[^.]*$")
+
+  # are there any files with the wrong extensions
+  is_bad_ext <- !is.na(file_ext) & file_ext != ext
+  if (any(is_bad_ext)) {
+    cli::cli_abort(
+      paste(paste(file[is_bad_ext], collapse = ", "),
+            if (sum(is_bad_ext) == 1) "has" else "have",
+            "the wrong extension. Expected: ", ext),
+      call = error_call
+    )
+  }
+
+  # append the ending where needed
+  paste0(file, dplyr::if_else(is.na(file_ext), ext, ""))
+
+}

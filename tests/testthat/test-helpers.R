@@ -22,3 +22,23 @@ test_that("test is_ip()", {
   expect_equal(is_ip(c()), logical(0))
   expect_equal(is_ip(rep(NA_character_, 5)), rep(NA, 5))
 })
+
+
+test_that("test file_name_with_ext()", {
+  expect_equal(
+    file_name_with_ext(c("file", "file.csv"), ".csv"),
+    rep("file.csv", 2)
+  )
+  expect_error(
+    file_name_with_ext(c("file", "file.csv"), ".txt"),
+    "file\\.csv has the wrong extension. Expected: \\.txt"
+  )
+  expect_error(
+    file_name_with_ext(c("file.dat", "file.csv"), ".rds"),
+    "file\\.dat, file.csv have the wrong extension. Expected: \\.rds"
+  )
+  expect_error(
+    file_name_with_ext(c("file", "file.csv"), c(".csv", ".txt")),
+    "ext must have length one."
+  )
+})
