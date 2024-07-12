@@ -1,0 +1,63 @@
+library(withr)
+library(RSQLite)
+
+test_that("test create_netscanr_db()", {
+  with_tempfile("netscanr_db", fileext = ".sqlite", {
+    # test creation of new netscanr db
+    expect_true(create_netscanr_db(netscanr_db))
+    expect_true(file.exists(netscanr_db))
+    with_db_connection(list(con = dbConnect(SQLite(), netscanr_db)), {
+      expect_equal(dbListTables(con), "netscanr")
+      expect_equal(
+        dbListFields(con, "netscanr"),
+        c("timestamp", "ip", "mac", "vendor", "description", "expected_ip",
+          "known_device")
+      )
+    })
+
+    # test error when db and table netscanr already exist
+    expect_error(create_netscanr_db(netscanr_db),
+                 "Table 'netscanr' already exists in database")
+
+    # test creation of table netscanr in existing db
+    with_db_connection(
+      list(con = dbConnect(SQLite(), netscanr_db)),
+      dbExecute(con, "DROP TABLE netscanr")
+    )
+    expect_true(create_netscanr_db(netscanr_db))
+    expect_true(file.exists(netscanr_db))
+    with_db_connection(list(con = dbConnect(SQLite(), netscanr_db)), {
+      expect_equal(dbListTables(con), "netscanr")
+      expect_equal(
+        dbListFields(con, "netscanr"),
+        c("timestamp", "ip", "mac", "vendor", "description", "expected_ip",
+          "known_device")
+      )
+    })
+  })
+})
+
+
+test_that("test create_netscanr_db() with errors", {
+
+  # test applying create_netscanr_db() on a file that is not a SQLite db
+  with_tempfile("not_a_db", fileext = ".sqlite", {
+    writeLines("not a database", not_a_db)
+    expect_error(create_netscanr_db(not_a_db),
+                 "The file is not a database")
+  })
+
+  # test creating a database in a directory that does not exist
+  with_tempfile("non_existent_dir", {
+    expect_error(
+      create_netscanr_db(file.path(non_existent_dir, "netscanr.sqlite")),
+      "Connecting to database .*/netscanr\\.sqlite failed."
+    )
+  })
+
+  # test creating a database with a wrong file extension
+  expect_error(
+    create_netscanr_db("netscanr.txt"),
+    "netscanr\\.txt has the wrong extension"
+  )
+})

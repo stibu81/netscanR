@@ -3,6 +3,7 @@ CMD
 Codecov
 FreeBDS
 IPv
+SQLite
 SUID
 arp
 csv

@@ -2,6 +2,7 @@
 
 export(arp_scan_version)
 export(can_run_arp_scan)
+export(create_netscanr_db)
 export(find_arp_scan)
 export(find_ifconfig)
 export(is_ip)
