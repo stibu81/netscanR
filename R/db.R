@@ -67,7 +67,7 @@ create_netscanr_table <- function(con, file) {
   # abort, if the table netscanr already exists
   if ("netscanr" %in% RSQLite::dbListTables(con)) {
     cli::cli_abort(
-      c("!" = "Table 'netscanr' already exists in database {file}.")
+      c("!" = "Table \"netscanr\" already exists in database {file}.")
     )
   }
 

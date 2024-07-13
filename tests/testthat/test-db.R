@@ -17,7 +17,7 @@ test_that("test create_netscanr_db()", {
 
     # test error when db and table netscanr already exist
     expect_error(create_netscanr_db(netscanr_db),
-                 "Table 'netscanr' already exists in database")
+                 "Table \"netscanr\" already exists in database")
 
     # test creation of table netscanr in existing db
     with_db_connection(

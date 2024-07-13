@@ -43,14 +43,14 @@ test_that("test read_device_list() with missing columns", {
       write_csv(dev_list_missing_columns_file)
     expect_error(
       read_device_list(dev_list_missing_columns_file),
-      "Columns 'mac' and/or 'description' missing"
+      "Columns \"mac\" and/or \"description\" missing"
     )
     dev_list_ref %>%
       select(-mac) %>%
       write_csv(dev_list_missing_columns_file)
     expect_error(
       read_device_list(dev_list_missing_columns_file),
-      "Columns 'mac' and/or 'description' missing"
+      "Columns \"mac\" and/or \"description\" missing"
     )
   })
 })
@@ -83,7 +83,7 @@ test_that("test read_device_list() with wrong delimiter", {
       write_delim(dev_list_bad_delim_file, delim = ";")
     expect_error(
       read_device_list(dev_list_bad_delim_file),
-      "has only one column. Ensure that ',' is used as the delimiter."
+      "has only one column. Ensure that \",\" is used as the delimiter."
     )
   })
 })

@@ -38,13 +38,13 @@ read_device_list <- function(file) {
 
   # try to catch the case where the wrong delimiter is used in the file
   if (ncol(dev_list) == 1) {
-    cli::cli_abort("{file} has only one column. Ensure that ','
+    cli::cli_abort("{file} has only one column. Ensure that \",\"
                    is used as the delimiter.")
   }
 
   # check: the file must contain the columns mac and description
   if (!all(c("mac", "description") %in% names(dev_list))) {
-    cli::cli_abort("Columns 'mac' and/or 'description' missing in {file}.")
+    cli::cli_abort("Columns \"mac\" and/or \"description\" missing in {file}.")
   }
 
   # if the ip column is missing, create it with missing values
