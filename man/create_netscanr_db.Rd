@@ -4,12 +4,14 @@
 \alias{create_netscanr_db}
 \title{Create netscanR SQLite Database}
 \usage{
-create_netscanr_db(file)
+create_netscanr_db(file, overwrite = FALSE)
 }
 \arguments{
 \item{file}{path to the SQLite database. If the file does not exist, it is
 created. The file should have the ending \code{.sqlite}. If omitted, the ending
 is added automatically.}
+
+\item{overwrite}{if \code{TRUE}, an existing file is overwritten.}
 }
 \value{
 invisible \code{TRUE} if the database and the table were created successfully.

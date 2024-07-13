@@ -6,6 +6,7 @@
 #' @param file path to the SQLite database. If the file does not exist, it is
 #' created. The file should have the ending `.sqlite`. If omitted, the ending
 #' is added automatically.
+#' @param overwrite if `TRUE`, an existing file is overwritten.
 #'
 #' @details
 #' This function creates an SQLite database that can be used to store repeated
@@ -22,9 +23,13 @@
 #'
 #' @export
 
-create_netscanr_db <- function(file) {
+create_netscanr_db <- function(file, overwrite = FALSE) {
 
   file <- file_name_with_ext(file, ".sqlite")
+
+  if (overwrite && file.exists(file)) {
+    file.remove(file)
+  }
 
   con <- connect_netscanr_db(file)
   withr::defer(RSQLite::dbDisconnect(con))

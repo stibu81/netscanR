@@ -34,6 +34,12 @@ test_that("test create_netscanr_db()", {
           "expected_ip", "known_device")
       )
     })
+
+    # test overwriting of existing database. Check that the database has been
+    # overwritten by comparing the modification time stamp
+    mod_before <- file.info(netscanr_db)$mtime
+    expect_true(create_netscanr_db(netscanr_db, overwrite = TRUE))
+    expect_gt(file.info(netscanr_db)$mtime, mod_before)
   })
 })
 
