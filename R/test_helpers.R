@@ -72,3 +72,63 @@ get_ifconfig_test_output <- function() {
       "        TX errors 0  dropped 0 overruns 0  carrier 0  collisions 0",
       "")
 }
+
+
+# get reference data for tests
+get_arp_scan_ref <- function(with_device_list = TRUE) {
+  arp_scan_ref <- dplyr::tibble(
+    interface = "wlp6s0",
+    ip = paste0("192.168.1.", c("1", "23", "27", "113", "178", "83", "111", "239")),
+    mac = c("b1:5b:92:b5:32:d8", "3d:3d:22:38:4d:ae", "31:3a:fa:32:b3:d3",
+            "cc:c1:79:a5:f9:f1", "ee:44:eb:bf:01:9a", "72:73:b3:17:d4:ac",
+            "da:13:54:95:ab:63", "f4:b5:d1:36:5e:32"),
+    vendor = c("Unknown", "ACME, Inc.", "Unknown: locally administered",
+               "Some Manufacturing Co., Ltd.",
+               rep("Unknown: locally administered", 3), "Unknown"),
+    description = c("Router", "Tablet Peter", NA, "Phone Peter", "Laptop Anna",
+                    "Phone Anna", "Laptop Frank", "Printer"),
+    expected_ip = c(TRUE, NA, NA, TRUE, TRUE, TRUE, TRUE, FALSE),
+    known_device = c(TRUE, TRUE, FALSE, TRUE, TRUE, TRUE, TRUE, TRUE)
+  )
+
+  if (!with_device_list) {
+    arp_scan_ref <- arp_scan_ref %>%
+      dplyr::select("interface":"vendor")
+  }
+
+  arp_scan_ref
+}
+
+
+get_ifconfig_ref <- function() {
+  dplyr::tibble(
+    name = c("docker0", "enp0s31f6", "lo", "wlp6s0"),
+    mtu = c(1500L, 1500L, 65536L, 1500L),
+    mac = c("03:28:b4:cb:32:d9", "5c:48:2a:d7:4d:9f", NA, "2c:6c:a4:a9:4d:a3"),
+    ipv4 = c("172.17.0.1", "192.168.1.57", "127.0.0.1", "192.168.1.132"),
+    netmask = c("255.255.0.0", "255.255.255.0", "255.0.0.0", "255.255.255.0")
+  )
+}
+
+
+get_device_list_ref <- function(with_ip = TRUE) {
+  dev_list_ref <- dplyr::tibble(
+    mac = c(
+      "b1:5b:92:b5:32:d8", "da:13:54:95:ab:63", "cc:c1:79:a5:f9:f1",
+      "ee:44:eb:bf:01:9a", "3d:3d:22:38:4d:ae", "f4:b5:d1:36:5e:32",
+      "72:73:b3:17:d4:ac"
+    ),
+    description = c(
+      "Router", "Laptop Frank", "Phone Peter", "Laptop Anna", "Tablet Peter",
+      "Printer", "Phone Anna"
+    ),
+    ip = c(
+      "192.168.1.1", "192.168.1.111", "192.168.1.113", "192.168.1.178",
+      NA, "192.168.1.240", "192.168.1.83"
+    )
+  )
+
+  if (!with_ip) dev_list_ref$ip <- NA_character_
+
+  dev_list_ref
+}

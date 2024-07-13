@@ -4,21 +4,7 @@ library(stringr)
 library(withr)
 
 dev_list_file <- system.file("extdata", "device_list.csv", package = "netscanR")
-dev_list_ref <- tibble(
-  mac = c(
-    "b1:5b:92:b5:32:d8", "da:13:54:95:ab:63", "cc:c1:79:a5:f9:f1",
-    "ee:44:eb:bf:01:9a", "3d:3d:22:38:4d:ae", "f4:b5:d1:36:5e:32",
-    "72:73:b3:17:d4:ac"
-  ),
-  description = c(
-    "Router", "Laptop Frank", "Phone Peter", "Laptop Anna", "Tablet Peter",
-    "Printer", "Phone Anna"
-  ),
-  ip = c(
-    "192.168.1.1", "192.168.1.111", "192.168.1.113", "192.168.1.178",
-    NA, "192.168.1.240", "192.168.1.83"
-  )
-)
+dev_list_ref <- get_device_list_ref()
 
 test_that("test read_device_list()", {
   expect_equal(read_device_list(dev_list_file), dev_list_ref)
@@ -30,8 +16,8 @@ test_that("test read_device_list() without ip column", {
     dev_list_ref %>%
       select(-ip) %>%
       write_csv(dev_list_no_ip_file)
-    dev_list_no_ip_ref <- dev_list_ref %>% mutate(ip = NA_character_)
-    expect_equal(read_device_list(dev_list_no_ip_file), dev_list_no_ip_ref)
+    expect_equal(read_device_list(dev_list_no_ip_file),
+                 get_device_list_ref(with_ip = FALSE))
   })
 })
 

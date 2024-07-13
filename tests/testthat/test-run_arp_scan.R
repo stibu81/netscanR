@@ -1,21 +1,6 @@
 library(dplyr, warn.conflicts = FALSE)
 
 device_list_file <- system.file("extdata", "device_list.csv", package = "netscanR")
-arp_scan_ref <- tibble(
-  interface = "wlp6s0",
-  ip = paste0("192.168.1.", c("1", "23", "27", "113", "178", "83", "111", "239")),
-  mac = c("b1:5b:92:b5:32:d8", "3d:3d:22:38:4d:ae", "31:3a:fa:32:b3:d3",
-          "cc:c1:79:a5:f9:f1", "ee:44:eb:bf:01:9a", "72:73:b3:17:d4:ac",
-          "da:13:54:95:ab:63", "f4:b5:d1:36:5e:32"),
-  vendor = c("Unknown", "ACME, Inc.", "Unknown: locally administered",
-             "Some Manufacturing Co., Ltd.",
-             rep("Unknown: locally administered", 3), "Unknown"),
-  description = c("Router", "Tablet Peter", NA, "Phone Peter", "Laptop Anna",
-                  "Phone Anna", "Laptop Frank", "Printer"),
-  expected_ip = c(TRUE, NA, NA, TRUE, TRUE, TRUE, TRUE, FALSE),
-  known_device = c(TRUE, TRUE, FALSE, TRUE, TRUE, TRUE, TRUE, TRUE)
-)
-
 
 test_that("test get_arp_scan_command()", {
   expect_equal(get_arp_scan_command(), "arp-scan --localnet 2>&1")
@@ -46,7 +31,7 @@ test_that("test run_arp_scan()", {
 
 test_that("test parse_arp_scan()", {
   expect_equal(parse_arp_scan(get_arp_scan_test_output()),
-               select(arp_scan_ref, interface:vendor))
+               get_arp_scan_ref(with_device_list = FALSE))
   parse_arp_scan(get_arp_scan_test_output(), verbose = TRUE) %>%
     expect_message("arp-scan was successful") %>%
     expect_message("Interface: wlp6s0") %>%
@@ -60,7 +45,7 @@ test_that("test parse_arp_scan()", {
 test_that("test apply_device_list()", {
   arp_scan_table <- parse_arp_scan(get_arp_scan_test_output())
   device_list <- read_device_list(device_list_file)
-  expect_equal(apply_device_list(arp_scan_table, device_list), arp_scan_ref)
+  expect_equal(apply_device_list(arp_scan_table, device_list), get_arp_scan_ref())
 })
 
 
