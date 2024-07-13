@@ -10,8 +10,8 @@ test_that("test create_netscanr_db()", {
       expect_equal(dbListTables(con), "netscanr")
       expect_equal(
         dbListFields(con, "netscanr"),
-        c("timestamp", "ip", "mac", "vendor", "description", "expected_ip",
-          "known_device")
+        c("timestamp", "interface", "ip", "mac", "vendor", "description",
+          "expected_ip", "known_device")
       )
     })
 
@@ -30,8 +30,8 @@ test_that("test create_netscanr_db()", {
       expect_equal(dbListTables(con), "netscanr")
       expect_equal(
         dbListFields(con, "netscanr"),
-        c("timestamp", "ip", "mac", "vendor", "description", "expected_ip",
-          "known_device")
+        c("timestamp", "interface", "ip", "mac", "vendor", "description",
+          "expected_ip", "known_device")
       )
     })
   })

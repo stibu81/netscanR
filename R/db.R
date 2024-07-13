@@ -74,7 +74,7 @@ create_netscanr_table <- function(con, file) {
   # create the table
   RSQLite::dbExecute(con,
     "CREATE TABLE netscanr (
-      timestamp INTEGER
+      timestamp INTEGER,
       interface TEXT,
       ip TEXT,
       mac TEXT,
