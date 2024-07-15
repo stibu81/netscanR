@@ -3,14 +3,16 @@ library(dplyr, warn.conflicts = FALSE)
 device_list_file <- system.file("extdata", "device_list.csv", package = "netscanR")
 
 test_that("test get_arp_scan_command()", {
-  expect_equal(get_arp_scan_command(), "arp-scan --localnet 2>&1")
+  expect_equal(get_arp_scan_command(), "arp-scan --localnet --retry=2 2>&1")
   expect_equal(get_arp_scan_command(hosts = "192.168.1.234"),
-               "arp-scan 192.168.1.234 2>&1")
+               "arp-scan --retry=2 192.168.1.234 2>&1")
   expect_equal(get_arp_scan_command(interface = "wlp6s0"),
-               "arp-scan --localnet --interface wlp6s0 2>&1")
+               "arp-scan --localnet --interface wlp6s0 --retry=2 2>&1")
   expect_equal(get_arp_scan_command(hosts = "192.168.1.23",
                                     interface = "wlp6s0"),
-               "arp-scan --interface wlp6s0 192.168.1.23 2>&1")
+               "arp-scan --interface wlp6s0 --retry=2 192.168.1.23 2>&1")
+  expect_equal(get_arp_scan_command(retry = 5),
+               "arp-scan --localnet --retry=5 2>&1")
   expect_error(get_arp_scan_command(localnet = FALSE),
                "Either provide hosts or set localnet to TRUE.")
 })
@@ -19,9 +21,12 @@ test_that("test get_arp_scan_command()", {
 test_that("test run_arp_scan()", {
   skip_on_ci()
   skip_on_cran()
-  expect_s3_class(run_arp_scan(), "tbl_df") %>%
+  expect_s3_class(run_arp_scan(retry = 1), "tbl_df") %>%
     expect_named(c("interface", "ip", "mac", "vendor"))
-  expect_s3_class(run_arp_scan(device_list = device_list_file), "tbl_df") %>%
+  expect_s3_class(
+      run_arp_scan(retry = 1, device_list = device_list_file),
+      "tbl_df"
+    ) %>%
     expect_named(c("interface", "ip", "mac", "vendor", "description",
                    "expected_ip", "known_device"))
   expect_error(run_arp_scan(interface = "doesnotexist"),
