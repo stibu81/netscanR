@@ -19,6 +19,12 @@
 #' @param retry integer, the number of times to retry sending the ARP request.
 #' Using more retries leads to a more reliable detection of hosts, but also
 #' increases the time the scan takes.
+#' @param interval integer, the time interval in microseconds between ARP
+#' requests. Setting this to a lower value speeds up the scan but may result
+#' in an ARP storm which can disrupt network operation. Also, setting the
+#' interval too low can send packets faster than the network interface can
+#' transmit them, which will eventually fill the kernel's transmit buffer
+#' resulting in the error message: No buffer space available.
 #' @param verbose logical, should additional output be printed to the console?
 #'
 #' @details
@@ -54,6 +60,7 @@ run_arp_scan <- function(localnet = TRUE,
                          hosts = NULL,
                          device_list = NULL,
                          retry = 2,
+                         interval = 2000,
                          verbose = FALSE) {
 
   if (find_arp_scan() == "") {
@@ -66,7 +73,13 @@ run_arp_scan <- function(localnet = TRUE,
     device_list <- read_device_list(device_list)
   }
 
-  arp_scan_command <- get_arp_scan_command(localnet, interface, hosts, retry)
+  arp_scan_command <- get_arp_scan_command(
+    localnet = localnet,
+    interface = interface,
+    hosts = hosts,
+    retry = retry,
+    interval = interval
+  )
 
   # if the command fails, system() produces a warning that is not useful
   suppressWarnings(
@@ -83,6 +96,7 @@ get_arp_scan_command <- function(localnet = TRUE,
                                  interface = NULL,
                                  hosts = NULL,
                                  retry = 2,
+                                 interval = 2000,
                                  error_call = rlang::caller_env()) {
 
   command <- "arp-scan"
@@ -102,7 +116,8 @@ get_arp_scan_command <- function(localnet = TRUE,
     command <- paste0(command, " --interface ", interface)
   }
 
-  command <- paste0(command, " --retry=", retry)
+  command <- paste0(command, " --retry=", round(retry))
+  command <- paste0(command, " --interval=", round(interval), "u")
 
   if (!is.null(hosts)) {
     command <- paste0(command, " ", paste(hosts, collapse = " "))

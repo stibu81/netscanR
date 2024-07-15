@@ -10,6 +10,7 @@ run_arp_scan(
   hosts = NULL,
   device_list = NULL,
   retry = 2,
+  interval = 2000,
   verbose = FALSE
 )
 }
@@ -37,6 +38,13 @@ stored as a csv-file or a tibble containing a device list. See
 \item{retry}{integer, the number of times to retry sending the ARP request.
 Using more retries leads to a more reliable detection of hosts, but also
 increases the time the scan takes.}
+
+\item{interval}{integer, the time interval in microseconds between ARP
+requests. Setting this to a lower value speeds up the scan but may result
+in an ARP storm which can disrupt network operation. Also, setting the
+interval too low can send packets faster than the network interface can
+transmit them, which will eventually fill the kernel's transmit buffer
+resulting in the error message: No buffer space available.}
 
 \item{verbose}{logical, should additional output be printed to the console?}
 }
