@@ -31,6 +31,20 @@ test_that("test get_arp_scan_command()", {
 test_that("test run_arp_scan()", {
   skip_on_cran()
   skip_on_os("mac")
+  expect_s3_class(run_arp_scan(retry = 0), "tbl_df") %>%
+    expect_named(c("interface", "ip", "mac", "vendor"))
+  expect_s3_class(
+      run_arp_scan(retry = 0, device_list = device_list_file),
+      "tbl_df"
+    ) %>%
+    expect_named(c("interface", "ip", "mac", "vendor", "description",
+                   "expected_ip", "known_device"))
+  expect_error(run_arp_scan(interface = "doesnotexist"),
+               "doesnotexist")
+
+  # running arp-scan on github actions works, but it aborts after scanning about
+  # 200 addresses, so we skip the test with retry > 0.
+  skip_on_ci()
   expect_s3_class(run_arp_scan(retry = 1, interval = 10), "tbl_df") %>%
     expect_named(c("interface", "ip", "mac", "vendor"))
   expect_s3_class(
@@ -39,8 +53,6 @@ test_that("test run_arp_scan()", {
     ) %>%
     expect_named(c("interface", "ip", "mac", "vendor", "description",
                    "expected_ip", "known_device"))
-  expect_error(run_arp_scan(interface = "doesnotexist"),
-               "doesnotexist")
 })
 
 
