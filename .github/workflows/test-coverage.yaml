@@ -24,7 +24,9 @@ jobs:
           use-public-rspm: true
 
       - name: Install arp-scan & ifconfig
-        run: sudo apt-get install -y arp-scan net-tools
+        run: |
+          sudo apt-get install -y arp-scan net-tools
+          sudo chmod u+s $(which arp-scan)
 
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:

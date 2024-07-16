@@ -42,7 +42,9 @@ jobs:
 
       - name: Install arp-scan & ifconfig
         if: matrix.config.os == 'ubuntu-latest'
-        run: sudo apt-get install -y arp-scan net-tools
+        run: |
+          sudo apt-get install -y arp-scan net-tools
+          sudo chmod u+s $(which arp-scan)
 
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
