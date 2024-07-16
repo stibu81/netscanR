@@ -29,8 +29,8 @@ test_that("test get_arp_scan_command()", {
 
 
 test_that("test run_arp_scan()", {
-  skip_on_ci()
   skip_on_cran()
+  skip_on_os("mac")
   expect_s3_class(run_arp_scan(retry = 1, interval = 10), "tbl_df") %>%
     expect_named(c("interface", "ip", "mac", "vendor"))
   expect_s3_class(

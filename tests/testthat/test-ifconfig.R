@@ -10,14 +10,17 @@ test_that("test find_ifconfig()", {
 
 
 test_that("test list_interfaces()", {
-  #skip_on_ci()
-  #skip_on_cran()
+  skip_on_cran()
+  skip_on_os("mac")
   expect_s3_class(list_interfaces(), "tbl_df") %>%
     expect_named(c("name", "mtu", "mac", "ipv4", "netmask"))
 })
 
 
 test_that("test list_interfaces()", {
-  expect_equal(parse_ifconfig(get_ifconfig_test_output()), get_ifconfig_ref())
+  expect_equal(
+    parse_ifconfig(get_ifconfig_test_output()),
+    get_ifconfig_ref()
+  )
 })
 

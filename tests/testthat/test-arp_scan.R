@@ -17,10 +17,11 @@ test_that("test arp_scan_version()", {
 test_that("test can_run_arpscan()", {
   expect_vector(can_run_arp_scan(verbose = FALSE), ptype = logical(0), size = 1) %>%
     expect_silent()
-  skip_on_ci()
+  skip_on_os("mac")
   skip_on_cran()
   suppressMessages(
-    expect_message(can_run_arp_scan(), "not running as root")
+    expect_true(can_run_arp_scan()) %>%
+      expect_message("running as root")
   )
   expect_true(can_run_arp_scan(verbose = FALSE))
 })
