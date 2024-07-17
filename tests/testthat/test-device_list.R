@@ -123,3 +123,113 @@ test_that("test read_device_list() with erroneous files", {
 
   })
 })
+
+
+arp_scan_table <- get_arp_scan_ref()
+
+test_that("test update_device_list() to create a new file with description", {
+  with_tempfile("dev_list_file_l", fileext = ".csv", {
+    dev_list_ref_l <- arp_scan_table %>%
+      select("mac", description = "vendor", "ip")
+    expect_equal(
+      update_device_list(arp_scan_table, dev_list_file_l),
+      dev_list_ref_l
+    )
+    expect_equal(read_device_list(dev_list_file_l), dev_list_ref_l)
+    # writing again should not change anything
+    update_device_list(arp_scan_table, dev_list_file_l)
+    expect_equal(read_device_list(dev_list_file_l), dev_list_ref_l)
+  })
+})
+
+
+test_that("test update_device_list() to create a new file without description", {
+  with_tempfile("dev_list_file_l", fileext = ".csv", {
+    dev_list_ref_l <- arp_scan_table %>%
+      select("mac", "ip") %>%
+      mutate(description = NA_character_, .after = "mac")
+    expect_equal(
+      update_device_list(arp_scan_table, dev_list_file_l,
+                         vendor_to_description = FALSE),
+      dev_list_ref_l
+    )
+    expect_equal(read_device_list(dev_list_file_l), dev_list_ref_l)
+    # writing again should not change anything
+    update_device_list(arp_scan_table, dev_list_file_l)
+    expect_equal(read_device_list(dev_list_file_l), dev_list_ref_l)
+  })
+})
+
+
+test_that("test update_device_list() to create a new file with ip update", {
+  with_tempfile("dev_list_file_l", fileext = ".csv", {
+    dev_list_ref_l <- arp_scan_table %>%
+      select("mac", description = "vendor", "ip")
+    expect_equal(
+      update_device_list(arp_scan_table, dev_list_file_l, update_ip = TRUE),
+      dev_list_ref_l
+    )
+    expect_equal(read_device_list(dev_list_file_l), dev_list_ref_l)
+    # writing again should not change anything
+    update_device_list(arp_scan_table, dev_list_file_l)
+    expect_equal(read_device_list(dev_list_file_l), dev_list_ref_l)
+  })
+})
+
+
+test_that("test update_device_list() to update a file with description", {
+  with_tempfile("dev_list_file_l", fileext = ".csv", {
+    file.copy(dev_list_file, dev_list_file_l)
+    dev_list_ref_l <- dev_list_ref %>%
+      add_row(mac = "31:3a:fa:32:b3:d3",
+              description = "Unknown: locally administered",
+              ip = "192.168.1.27")
+    expect_equal(
+      update_device_list(arp_scan_table, dev_list_file_l),
+      dev_list_ref_l
+    )
+    expect_equal(read_device_list(dev_list_file_l), dev_list_ref_l)
+    # writing again should not change anything
+    update_device_list(arp_scan_table, dev_list_file_l)
+    expect_equal(read_device_list(dev_list_file_l), dev_list_ref_l)
+  })
+})
+
+
+test_that("test update_device_list() to update a file without description", {
+  with_tempfile("dev_list_file_l", fileext = ".csv", {
+    file.copy(dev_list_file, dev_list_file_l)
+    dev_list_ref_l <- dev_list_ref %>%
+      add_row(mac = "31:3a:fa:32:b3:d3",
+              ip = "192.168.1.27")
+    expect_equal(
+      update_device_list(arp_scan_table, dev_list_file_l,
+                         vendor_to_description = FALSE),
+      dev_list_ref_l
+    )
+    expect_equal(read_device_list(dev_list_file_l), dev_list_ref_l)
+    # writing again should not change anything
+    update_device_list(arp_scan_table, dev_list_file_l)
+    expect_equal(read_device_list(dev_list_file_l), dev_list_ref_l)
+  })
+})
+
+
+test_that("test update_device_list() to update a file with ip update", {
+  with_tempfile("dev_list_file_l", fileext = ".csv", {
+    file.copy(dev_list_file, dev_list_file_l)
+    dev_list_ref_l <- dev_list_ref %>%
+      add_row(mac = "31:3a:fa:32:b3:d3",
+              description = "Unknown: locally administered",
+              ip = "192.168.1.27")
+    dev_list_ref_l$ip[c(5, 6)] <- c("192.168.1.23", "192.168.1.239")
+    expect_equal(
+      update_device_list(arp_scan_table, dev_list_file_l, update_ip = TRUE),
+      dev_list_ref_l
+    )
+    expect_equal(read_device_list(dev_list_file_l), dev_list_ref_l)
+    # writing again should not change anything
+    update_device_list(arp_scan_table, dev_list_file_l, update_ip = TRUE)
+    expect_equal(read_device_list(dev_list_file_l), dev_list_ref_l)
+  })
+})

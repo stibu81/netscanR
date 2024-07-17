@@ -34,7 +34,9 @@
 
 read_device_list <- function(file) {
 
-  dev_list <- readr::read_csv(file, show_col_types = FALSE)
+  # read all columns as character. This is necessary, because columns
+  # description and ip might be empty and would be read as logical in this case.
+  dev_list <- readr::read_csv(file, col_types = readr::cols(.default = "c"))
 
   # try to catch the case where the wrong delimiter is used in the file
   if (ncol(dev_list) == 1) {
@@ -115,4 +117,71 @@ check_device_list <- function(dev_list, error_call = rlang::caller_env()) {
 
   dev_list
 
+}
+
+
+#' Update List of Network Devices with Results from arp-scan
+#'
+#' Use the results from arp-scan to update the device list.
+#'
+#' @param arp_scan_table a tibble with the output from [`run_arp_scan()`]
+#' @param device_list_file path to a device list file. If it exists, missing devices
+#' are added. If it does not exist, a new device list is created containing
+#' all the devices from `arp_scan_table`.
+#' @param vendor_to_description logical. If `TRUE`, the vendor information is
+#' used as the description of the device. If `FALSE`, the description is left
+#' empty.
+#' @param update_ip logical. Should the expected IP in the device list be
+#' updated with the IP addresses from `arp_scan_table`.
+#'
+#' @returns
+#' a tibble containing the updated device list. The file `device_list` is
+#' updated or created as a side effect.
+#'
+#' @export
+
+update_device_list <- function(arp_scan_table,
+                               device_list_file,
+                               vendor_to_description = TRUE,
+                               update_ip = FALSE) {
+
+  # convert the arp-scan table to device list format
+  device_list_update <- arp_scan_table %>%
+    dplyr::select("mac", description = "vendor", "ip")
+
+  # if the vendor information should not be used as description, overwrite it
+  if (!vendor_to_description) {
+    device_list_update$description <- NA_character_
+  }
+
+  # read the device_list, if it exists
+  device_list <- if (file.exists(device_list_file)) {
+    read_device_list(device_list_file)
+  } else {
+    dplyr::tibble(mac = character(0),
+                  description = character(0),
+                  ip = character(0))
+  }
+
+  # add the devices that are missing in the device list
+  device_list <- device_list %>%
+    dplyr::bind_rows(
+      device_list_update %>%
+        dplyr::anti_join(device_list, by = "mac")
+    )
+
+  # overwrite the IP addresses if requested
+  if (update_ip) {
+    device_list <- device_list %>%
+      dplyr::left_join(
+        device_list_update %>% dplyr::select(-"description"),
+        by = "mac",
+        suffix = c("_old", "_new")) %>%
+      dplyr::mutate(ip = dplyr::coalesce(.data$ip_new, .data$ip_old)) %>%
+      dplyr::select(-"ip_new", -"ip_old")
+  }
+
+  readr::write_csv(device_list, device_list_file)
+
+  device_list
 }
