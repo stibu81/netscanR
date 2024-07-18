@@ -181,7 +181,7 @@ update_device_list <- function(arp_scan_table,
       dplyr::select(-"ip_new", -"ip_old")
   }
 
-  readr::write_csv(device_list, device_list_file)
+  readr::write_csv(device_list, device_list_file, na = "")
 
   device_list
 }
