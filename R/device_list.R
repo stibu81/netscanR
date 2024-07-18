@@ -133,6 +133,8 @@ check_device_list <- function(dev_list, error_call = rlang::caller_env()) {
 #' empty.
 #' @param update_ip logical. Should the expected IP in the device list be
 #' updated with the IP addresses from `arp_scan_table`.
+#' @param verbose should additional output be produced. This defaults to
+#' `TRUE` in interactive sessions.
 #'
 #' @returns
 #' a tibble containing the updated device list. The file `device_list` is
@@ -143,7 +145,8 @@ check_device_list <- function(dev_list, error_call = rlang::caller_env()) {
 update_device_list <- function(arp_scan_table,
                                device_list_file,
                                vendor_to_description = TRUE,
-                               update_ip = FALSE) {
+                               update_ip = FALSE,
+                               verbose = interactive()) {
 
   # convert the arp-scan table to device list format
   device_list_update <- arp_scan_table %>%
@@ -158,17 +161,32 @@ update_device_list <- function(arp_scan_table,
   device_list <- if (file.exists(device_list_file)) {
     read_device_list(device_list_file)
   } else {
+    if (verbose) {
+      cli::cli_alert_info(
+        "The file {device_list_file} does not exist and will be created."
+      )
+    }
     dplyr::tibble(mac = character(0),
                   description = character(0),
                   ip = character(0))
   }
 
-  # add the devices that are missing in the device list
-  device_list <- device_list %>%
-    dplyr::bind_rows(
-      device_list_update %>%
+  # filter out the devices that are already in the device list
+  device_list_update_new <- device_list_update %>%
         dplyr::anti_join(device_list, by = "mac")
+
+  if (verbose && nrow(device_list_update_new) > 0) {
+    cli::cli_rule(
+      left = cli::style_bold(
+        glue::glue("Adding {nrow(device_list_update_new)} devices to device list")
+      )
     )
+    print_tibble_simple(device_list_update_new)
+    cli::cli_rule()
+  }
+
+  # add the devices that are missing in the device list
+  device_list <- dplyr::bind_rows(device_list, device_list_update_new)
 
   # overwrite the IP addresses if requested
   if (update_ip) {
@@ -177,11 +195,28 @@ update_device_list <- function(arp_scan_table,
         device_list_update %>% dplyr::select(-"description"),
         by = "mac",
         suffix = c("_old", "_new")) %>%
-      dplyr::mutate(ip = dplyr::coalesce(.data$ip_new, .data$ip_old)) %>%
-      dplyr::select(-"ip_new", -"ip_old")
+      dplyr::mutate(ip = dplyr::coalesce(.data$ip_new, .data$ip_old))
+
+    modified_ip <- device_list %>%
+      # this is enougth to spot the changes because the new ip is never missing
+      dplyr::filter(is.na(.data$ip_old) | .data$ip_new != .data$ip_old)
+
+    if (verbose && nrow(modified_ip) > 0) {
+      cli::cli_rule(
+        left = cli::style_bold(
+          glue::glue("Modifying {nrow(modified_ip)} ip addresses in device list")
+        )
+      )
+      modified_ip %>%
+        dplyr::select(-"ip") %>%
+        print_tibble_simple()
+      cli::cli_rule()
+    }
+
+    device_list <- device_list %>% dplyr::select(-"ip_new", -"ip_old")
   }
 
   readr::write_csv(device_list, device_list_file, na = "")
 
-  device_list
+  invisible(device_list)
 }

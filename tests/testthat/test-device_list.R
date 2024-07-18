@@ -233,3 +233,111 @@ test_that("test update_device_list() to update a file with ip update", {
     expect_equal(read_device_list(dev_list_file_l), dev_list_ref_l)
   })
 })
+
+
+test_that("test update_device_list() for a new file with verbose", {
+  with_tempfile("dev_list_file_l", fileext = ".csv", {
+    dev_list_ref_l <- arp_scan_table %>%
+      select("mac", description = "vendor", "ip")
+    expect_equal(
+        update_device_list(arp_scan_table, dev_list_file_l, verbose = TRUE),
+        dev_list_ref_l
+      ) %>%
+      expect_message("does not exist and will be created") %>%
+      # the rules are also output as messages
+      expect_message("-- Adding 8 devices to device list") %>%
+      expect_message("-----") %>%
+      # the rest of the output is created from the reference device list
+      expect_output(
+        paste(
+          "mac\\s*description\\s*ip",
+          do.call(
+            paste,
+            c(dev_list_ref_l, list(sep = "\\s*", collapse = "\\s*\\n.*"))
+          ),
+          sep = "\\s*\\n.*"
+        )
+      )
+    expect_silent(
+      update_device_list(arp_scan_table, dev_list_file_l, verbose = TRUE)
+    )
+  })
+})
+
+
+test_that("test update_device_list() to update a file with verbose", {
+  with_tempfile("dev_list_file_l", fileext = ".csv", {
+    file.copy(dev_list_file, dev_list_file_l)
+    dev_list_ref_l <- dev_list_ref %>%
+      add_row(mac = "31:3a:fa:32:b3:d3",
+              description = "Unknown: locally administered",
+              ip = "192.168.1.27")
+    expect_equal(
+        update_device_list(arp_scan_table, dev_list_file_l, verbose = TRUE),
+        dev_list_ref_l
+      ) %>%
+      # the rules are also output as messages
+      expect_message("-- Adding 1 devices to device list") %>%
+      expect_message("-----") %>%
+      # the rest of the output is created from the reference device list
+      expect_output(
+        paste(
+          "mac\\s*description\\s*ip",
+          do.call(
+            paste,
+            c(dev_list_ref_l[8, ], list(sep = "\\s*", collapse = "\\s*\\n.*"))
+          ),
+          sep = "\\s*\\n.*"
+        )
+      )
+    expect_silent(
+      update_device_list(arp_scan_table, dev_list_file_l, verbose = TRUE)
+    )
+  })
+})
+
+
+test_that("test update_device_list() with ip update with verbose", {
+  with_tempfile("dev_list_file_l", fileext = ".csv", {
+    file.copy(dev_list_file, dev_list_file_l)
+    dev_list_ref_l <- dev_list_ref %>%
+      add_row(mac = "31:3a:fa:32:b3:d3",
+              description = "Unknown: locally administered",
+              ip = "192.168.1.27")
+    dev_list_ref_l$ip[c(5, 6)] <- c("192.168.1.23", "192.168.1.239")
+    mod_ip_ref <- dev_list_ref %>%
+      inner_join(dev_list_ref_l, by = c("mac", "description")) %>%
+      filter(is.na(ip.x) | ip.x != ip.y)
+    expect_equal(
+        update_device_list(arp_scan_table, dev_list_file_l,
+                           update_ip = TRUE, verbose = TRUE),
+        dev_list_ref_l
+      ) %>%
+      # the rules are also output as messages
+      expect_message("-- Adding 1 devices to device list") %>%
+      expect_message("-----") %>%
+      expect_message("-- Modifying 2 ip addresses in device list") %>%
+      expect_message("-----") %>%
+      # the rest of the output is created from the reference device list
+      expect_output(
+        paste(
+          "mac\\s*description\\s*ip",
+          do.call(
+            paste,
+            c(dev_list_ref_l[8, ], list(sep = "\\s*", collapse = "\\s*\\n.*"))
+          ),
+          "mac\\s*description\\s*ip_old\\s*ip_new",
+          do.call(
+              paste,
+              c(mod_ip_ref, list(sep = "\\s*", collapse = "\\s*\\n.*"))
+            ) %>%
+            str_replace("NA", "<NA>"),
+          sep = "\\s*\\n.*"
+        )
+      )
+    expect_silent(
+      update_device_list(arp_scan_table, dev_list_file_l,
+                         update_ip = TRUE, verbose = TRUE)
+    )
+  })
+})

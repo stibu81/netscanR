@@ -1,6 +1,6 @@
 Package: netscanR
 Title: Scan the Local Network with R
-Version: 0.0.0.9021
+Version: 0.0.0.9022
 Author: Stefan Lanz
 Maintainer: Stefan Lanz <slanz1137@gmail.com>
 Description: Scan the network with arp-scan and parse the results into a
@@ -13,6 +13,7 @@ RoxygenNote: 7.3.2
 Imports:
     dplyr,
     stringr,
+    pillar,
     cli,
     glue,
     rlang,

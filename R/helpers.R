@@ -60,3 +60,10 @@ file_name_with_ext <- function(file, ext, error_call = rlang::caller_env()) {
   paste0(file, dplyr::if_else(is.na(file_ext), ext, ""))
 
 }
+
+
+# print a tibble without the header ()# A tibble: ...) and data types
+print_tibble_simple <- function(df) {
+  df_fmt <- pillar::tbl_format_body(df, pillar::tbl_format_setup(df))
+  print(df_fmt[-2])
+}

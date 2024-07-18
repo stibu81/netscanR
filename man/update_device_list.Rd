@@ -8,7 +8,8 @@ update_device_list(
   arp_scan_table,
   device_list_file,
   vendor_to_description = TRUE,
-  update_ip = FALSE
+  update_ip = FALSE,
+  verbose = interactive()
 )
 }
 \arguments{
@@ -24,6 +25,9 @@ empty.}
 
 \item{update_ip}{logical. Should the expected IP in the device list be
 updated with the IP addresses from \code{arp_scan_table}.}
+
+\item{verbose}{should additional output be produced. This defaults to
+\code{TRUE} in interactive sessions.}
 }
 \value{
 a tibble containing the updated device list. The file \code{device_list} is
