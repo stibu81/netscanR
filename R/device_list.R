@@ -198,7 +198,7 @@ update_device_list <- function(arp_scan_table,
       dplyr::mutate(ip = dplyr::coalesce(.data$ip_new, .data$ip_old))
 
     modified_ip <- device_list %>%
-      # this is enougth to spot the changes because the new ip is never missing
+      # this is enough to spot the changes because the new ip is never missing
       dplyr::filter(is.na(.data$ip_old) | .data$ip_new != .data$ip_old)
 
     if (verbose && nrow(modified_ip) > 0) {
