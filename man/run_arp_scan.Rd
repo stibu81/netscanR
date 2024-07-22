@@ -11,6 +11,7 @@ run_arp_scan(
   device_list = NULL,
   retry = 2,
   interval = 2000,
+  require_ping = 0,
   verbose = FALSE
 )
 }
@@ -45,6 +46,10 @@ in an ARP storm which can disrupt network operation. Also, setting the
 interval too low can send packets faster than the network interface can
 transmit them, which will eventually fill the kernel's transmit buffer
 resulting in the error message: No buffer space available.}
+
+\item{require_ping}{integer, the number of pings to send to each host to
+check that it is reachable. If a host does not respond to at least one ping,
+it is removed from the output. Set to 0 to not require any successful pings.}
 
 \item{verbose}{logical, should additional output be printed to the console?}
 }

@@ -25,6 +25,9 @@
 #' interval too low can send packets faster than the network interface can
 #' transmit them, which will eventually fill the kernel's transmit buffer
 #' resulting in the error message: No buffer space available.
+#' @param require_ping integer, the number of pings to send to each host to
+#' check that it is reachable. If a host does not respond to at least one ping,
+#' it is removed from the output. Set to 0 to not require any successful pings.
 #' @param verbose logical, should additional output be printed to the console?
 #'
 #' @details
@@ -61,6 +64,7 @@ run_arp_scan <- function(localnet = TRUE,
                          device_list = NULL,
                          retry = 2,
                          interval = 2000,
+                         require_ping = 0,
                          verbose = FALSE) {
 
   if (find_arp_scan() == "") {
@@ -87,7 +91,8 @@ run_arp_scan <- function(localnet = TRUE,
   )
 
   parse_arp_scan(arp_scan_output, verbose = verbose) %>%
-    apply_device_list(device_list)
+    apply_device_list(device_list) %>%
+    filter_by_ping(require_ping)
 
 }
 
@@ -249,6 +254,42 @@ apply_device_list <- function(arp_scan_table, device_list) {
       dplyr::left_join(device_list, by = "mac") %>%
       dplyr::mutate(expected_ip = .data$ip == .data$expected_ip,
                     known_device = .data$mac %in% device_list$mac)
+  }
+
+  arp_scan_table
+
+}
+
+
+filter_by_ping <- function(arp_scan_table, require_ping, timeout = 0.5) {
+
+  if (require_ping > 0) {
+    # ping the IP addresses and keep only those that could be reached
+    # this is only done for known devices, since other devices could pose
+    # a security risk and should not be filtered out
+
+    # if the column known_device is not present, filtering is not possible
+    if (!"known_device" %in% names(arp_scan_table)) {
+      cli::cli_alert_warning(
+        paste("Cannot filter by ping, since the column \"known_device\" is",
+              "missing. Use a device list to add this column.")
+      )
+      return(arp_scan_table)
+    }
+    known_devices <- arp_scan_table %>%
+      dplyr::filter(.data$known_device)
+    if (nrow(known_devices) > 0) {
+      ping_results <- known_devices %>%
+        dplyr::mutate(
+          can_ping = ping(.data$ip, count = require_ping, timeout = timeout)
+        ) %>%
+        dplyr::select("mac", "can_ping")
+      arp_scan_table <- arp_scan_table %>%
+        dplyr::left_join(ping_results, by = "mac") %>%
+        # keep all unknown devices and devices that could be pinged
+        dplyr::filter(!.data$known_device | .data$can_ping) %>%
+        dplyr::select(-"can_ping")
+    }
   }
 
   arp_scan_table

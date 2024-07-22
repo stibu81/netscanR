@@ -39,6 +39,12 @@ test_that("test run_arp_scan()", {
     ) %>%
     expect_named(c("interface", "ip", "mac", "vendor", "description",
                    "expected_ip", "known_device"))
+  expect_s3_class(
+      run_arp_scan(retry = 0, device_list = device_list_file, require_ping = 5),
+      "tbl_df"
+    ) %>%
+    expect_named(c("interface", "ip", "mac", "vendor", "description",
+                   "expected_ip", "known_device"))
   expect_error(run_arp_scan(interface = "doesnotexist"),
                "doesnotexist")
 
@@ -49,6 +55,14 @@ test_that("test run_arp_scan()", {
     expect_named(c("interface", "ip", "mac", "vendor"))
   expect_s3_class(
       run_arp_scan(retry = 1, interval = 10, device_list = device_list_file),
+      "tbl_df"
+    ) %>%
+    expect_named(c("interface", "ip", "mac", "vendor", "description",
+                   "expected_ip", "known_device"))
+  expect_s3_class(
+      run_arp_scan(retry = 1, interval = 10,
+                   device_list = device_list_file,
+                   require_ping = 5),
       "tbl_df"
     ) %>%
     expect_named(c("interface", "ip", "mac", "vendor", "description",
@@ -98,4 +112,33 @@ test_that("test format_arp_scan_errors()", {
       "!" = "WARNING: get_host_address failed for \"badhost\": Name or service not known - target ignored",
       "x" = "ERROR: No hosts to process.")
   )
+})
+
+
+test_that("test filter_by_ping()", {
+  skip_on_cran()
+  skip_on_os("mac")
+  arp_scan_table <- get_arp_scan_ref() %>%
+    mutate(ip = paste0("127.0.0.", 1:8))
+  expect_equal(
+    filter_by_ping(arp_scan_table, require_ping = 2),
+    arp_scan_table
+  )
+  # set three IPs to addresses that do not exist in my local network
+  arp_scan_table$ip[c(3, 5, 7)] <- paste0("192.168.1.", 2:4)
+  expect_equal(
+    filter_by_ping(arp_scan_table, require_ping = 2, timeout = 0.1),
+    arp_scan_table[-c(5, 7), ]
+  )
+  arp_scan_table$known_device <- FALSE
+  expect_equal(
+    filter_by_ping(arp_scan_table, require_ping = 2),
+    arp_scan_table
+  )
+  arp_scan_table <- get_arp_scan_ref(with_device_list = FALSE)
+  expect_equal(
+      filter_by_ping(arp_scan_table, require_ping = 2),
+      arp_scan_table
+    ) %>%
+    expect_message("Cannot filter by ping")
 })
