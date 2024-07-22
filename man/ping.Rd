@@ -23,3 +23,7 @@ IP address could be reached.
 Ping a list of IP addresses and return for each one, whether it could be
 reached.
 }
+\details{
+\code{ping()} sends \code{count} packets to each IP address in \code{hosts}. It returns
+\code{TRUE}, if at least one response was received and \code{FALSE} otherwise.
+}

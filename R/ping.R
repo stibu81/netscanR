@@ -23,6 +23,10 @@ find_ping <- function() {
 #' @param interval numeric giving the time interval between packets.
 #' @param timeout numeric giving the time to wait for a response.
 #'
+#' @details
+#' `ping()` sends `count` packets to each IP address in `hosts`. It returns
+#' `TRUE`, if at least one response was received and `FALSE` otherwise.
+#'
 #' @returns
 #' a named logical vector of the same length as `hosts` indicating whether the
 #' IP address could be reached.
