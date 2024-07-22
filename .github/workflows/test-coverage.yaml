@@ -23,9 +23,9 @@ jobs:
         with:
           use-public-rspm: true
 
-      - name: Install arp-scan & ifconfig
+      - name: Install arp-scan, ifconfig & ping
         run: |
-          sudo apt-get install -y arp-scan net-tools
+          sudo apt-get install -y arp-scan net-tools iputils-ping
           sudo chmod u+s $(which arp-scan)
 
       - uses: r-lib/actions/setup-r-dependencies@v2

@@ -74,6 +74,32 @@ get_ifconfig_test_output <- function() {
 }
 
 
+get_ping_test_output <- function(failure = FALSE) {
+  if (failure) {
+    out <- c("PING 192.168.1.157 (192.168.1.134) 56(84) bytes of data.",
+             "From 192.168.1.132 icmp_seq=1 Destination Host Unreachable",
+             "From 192.168.1.132 icmp_seq=2 Destination Host Unreachable",
+             "From 192.168.1.132 icmp_seq=3 Destination Host Unreachable", "",
+             "--- 192.168.1.157 ping statistics ---",
+             "3 packets transmitted, 0 received, +3 errors, 100% packet loss, time 2044ms",
+             "pipe 3")
+
+    attr(out, "status") <- 1L
+    attr(out, "errmsg") <- "Resource temporarily unavailable"
+  } else {
+    out <- c("PING 192.168.1.1 (192.168.1.1) 56(84) bytes of data.",
+             "64 bytes from 192.168.1.1: icmp_seq=1 ttl=1 time=4.62 ms",
+             "64 bytes from 192.168.1.1: icmp_seq=2 ttl=64 time=4.92 ms",
+             "64 bytes from 192.168.1.1: icmp_seq=3 ttl=64 time=5.32 ms", "",
+             "--- 192.168.1.1 ping statistics ---",
+             "3 packets transmitted, 3 received, 0% packet loss, time 2003ms",
+             "rtt min/avg/max/mdev = 4.623/4.952/5.315/0.283 ms")
+  }
+
+  out
+}
+
+
 # get reference data for tests
 get_arp_scan_ref <- function(with_device_list = TRUE) {
   arp_scan_ref <- dplyr::tibble(
