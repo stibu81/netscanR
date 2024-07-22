@@ -7,7 +7,7 @@
 find_ifconfig()
 }
 \value{
-The path to the arp-scan executable as a character.
+The path to the ifconfig executable as a character.
 If it is not found, an empty character is returned.
 }
 \description{
