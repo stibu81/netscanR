@@ -1,3 +1,4 @@
+ARP
 CIDR
 CMD
 Codecov
@@ -7,6 +8,7 @@ SQLite
 SUID
 arp
 csv
+es
 ifconfig
 macOS
 setuid

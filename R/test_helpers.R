@@ -1,5 +1,5 @@
 # get sample output for tests
-get_arp_scan_test_output <- function(error = FALSE) {
+get_arp_scan_test_output <- function(error = FALSE, with_repeater = FALSE) {
   header <- "Interface: wlp6s0, type: EN10MB, MAC: 2c:6c:a4:a9:4d:a3, IPv4: 192.168.1.132"
   if (error) {
     out <- c(header,
@@ -23,6 +23,13 @@ get_arp_scan_test_output <- function(error = FALSE) {
       "8 packets received by filter, 0 packets dropped by kernel",
       "Ending arp-scan 1.9.7: 256 hosts scanned in 2.122 seconds (120.64 hosts/sec). 8 responded"
     )
+
+    # if with_repeater is TRUE, hide some devices behind the repeater
+    if (with_repeater) {
+      repeater_mac <- "2a:53:59:e4:3f:80"
+      out[c(4, 7, 9, 10, 11)] <- out[c(4, 7, 9, 10, 11)] %>%
+        stringr::str_replace(mac_pattern, repeater_mac)
+    }
   }
 
   out

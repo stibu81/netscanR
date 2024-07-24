@@ -83,6 +83,12 @@ test_that("test parse_arp_scan()", {
 })
 
 
+test_that("test parse_arp_scan() with error", {
+  expect_error(parse_arp_scan(get_arp_scan_test_output(error = TRUE)),
+               "ERROR: No hosts to process.")
+})
+
+
 test_that("test apply_device_list()", {
   arp_scan_table <- parse_arp_scan(get_arp_scan_test_output())
   device_list <- read_device_list(device_list_file)
@@ -90,9 +96,26 @@ test_that("test apply_device_list()", {
 })
 
 
-test_that("test parse_arp_scan() with error", {
-  expect_error(parse_arp_scan(get_arp_scan_test_output(error = TRUE)),
-               "ERROR: No hosts to process.")
+test_that("test apply_device_list() with repeater", {
+  arp_scan_table <- parse_arp_scan(get_arp_scan_test_output(with_repeater = TRUE))
+  device_list <- read_device_list(device_list_file)
+  # create reference that reflects that rows 2 and 8 cannot be fixed
+  arp_scan_ref <- get_arp_scan_ref()
+  arp_scan_ref$mac[c(2, 8)] <- "2a:53:59:e4:3f:80"
+  arp_scan_ref$description[c(2, 8)] <- NA_character_
+  arp_scan_ref$expected_ip[c(2, 8)] <- NA
+  arp_scan_ref$known_device[c(2, 8)] <- FALSE
+  expect_equal(
+    apply_device_list(arp_scan_table, device_list, repeater = "2a:53:59:e4:3f:80"),
+    arp_scan_ref
+  )
+  expect_equal(
+      apply_device_list(arp_scan_table, device_list, repeater = "no_mac"),
+      apply_device_list(arp_scan_table, device_list)
+    ) %>%
+    expect_message(
+    "repeater must be a character vector of one or more MAC addresses."
+  )
 })
 
 

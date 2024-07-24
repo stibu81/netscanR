@@ -16,6 +16,14 @@
 #' @param device_list character giving the path where the device list is
 #' stored as a csv-file or a tibble containing a device list. See
 #' [`read_device_list()`] for more information.
+#' @param repeater character, the mac address(es) of one or several repeaters
+#' that may be present in the network. `arp-scan` reports devices that are
+#' connected to a repeater with the mac address of the repeater such that they
+#' cannot be correctly identified. (Note that this mac address may even deviate
+#' from the mac address that is reported by `arp-scan` for the repeater itself.)
+#' If one  or multiple repeater addresses are provided, the devices
+#' connected to the repeater(s) are identified via their IP address instead.
+#' Of course, this only works, if the IP addresses are static.
 #' @param retry integer, the number of times to retry sending the ARP request.
 #' Using more retries leads to a more reliable detection of hosts, but also
 #' increases the time the scan takes.
@@ -62,6 +70,7 @@ run_arp_scan <- function(localnet = TRUE,
                          interface = NULL,
                          hosts = NULL,
                          device_list = NULL,
+                         repeater = c(),
                          retry = 2,
                          interval = 2000,
                          require_ping = 0,
@@ -91,7 +100,7 @@ run_arp_scan <- function(localnet = TRUE,
   )
 
   parse_arp_scan(arp_scan_output, verbose = verbose) %>%
-    apply_device_list(device_list) %>%
+    apply_device_list(device_list, repeater) %>%
     filter_by_ping(require_ping)
 
 }
@@ -246,7 +255,10 @@ format_arp_scan_errors <- function(arp_scan_output) {
 }
 
 
-apply_device_list <- function(arp_scan_table, device_list) {
+apply_device_list <- function(arp_scan_table,
+                              device_list,
+                              repeater = c(),
+                              error_call = rlang::caller_env()) {
 
   if (!is.null(device_list)) {
     device_list <- device_list %>% dplyr::rename(expected_ip = "ip")
@@ -254,6 +266,37 @@ apply_device_list <- function(arp_scan_table, device_list) {
       dplyr::left_join(device_list, by = "mac") %>%
       dplyr::mutate(expected_ip = .data$ip == .data$expected_ip,
                     known_device = .data$mac %in% device_list$mac)
+
+    # if repeater is provided, identify devices connected to the repeater
+    # (i.e., reported with the repeater's mac address) via their IP address.
+    if (length(repeater) > 0) {
+      if (!all(is_mac(repeater))) {
+        cli::cli_alert_warning(
+          paste("repeater must be a character vector of one or more",
+                "MAC addresses. The argument is ignored.")
+        )
+        return(arp_scan_table)
+      }
+
+      # identify the devices connected to the repeater(s) via their IP address
+      arp_scan_table <- arp_scan_table %>%
+        dplyr::left_join(device_list, by = c("ip" = "expected_ip"),
+                         suffix = c("", "_by_ip"))
+      # find the rows that have the router mac and where a mac can be mapped
+      # through the ip
+      mac_from_ip <- arp_scan_table$mac %in% repeater &
+        !is.na(arp_scan_table$mac_by_ip)
+
+      # fix these rows
+      arp_scan_table$mac[mac_from_ip] <- arp_scan_table$mac_by_ip[mac_from_ip]
+      arp_scan_table$description[mac_from_ip] <-
+        arp_scan_table$description_by_ip[mac_from_ip]
+      arp_scan_table$known_device[mac_from_ip] <- TRUE
+      arp_scan_table$expected_ip[mac_from_ip] <- TRUE
+
+      arp_scan_table <- arp_scan_table %>%
+        dplyr::select(-dplyr::ends_with("_by_ip"))
+    }
   }
 
   arp_scan_table

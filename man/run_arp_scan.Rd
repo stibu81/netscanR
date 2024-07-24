@@ -9,6 +9,7 @@ run_arp_scan(
   interface = NULL,
   hosts = NULL,
   device_list = NULL,
+  repeater = c(),
   retry = 2,
   interval = 2000,
   require_ping = 0,
@@ -35,6 +36,15 @@ If \code{hosts} is provided, \code{localnet} is ignored.}
 \item{device_list}{character giving the path where the device list is
 stored as a csv-file or a tibble containing a device list. See
 \code{\link[=read_device_list]{read_device_list()}} for more information.}
+
+\item{repeater}{character, the mac address(es) of one or several repeaters
+that may be present in the network. \code{arp-scan} reports devices that are
+connected to a repeater with the mac address of the repeater such that they
+cannot be correctly identified. (Note that this mac address may even deviate
+from the mac address that is reported by \code{arp-scan} for the repeater itself.)
+If one  or multiple repeater addresses are provided, the devices
+connected to the repeater(s) are identified via their IP address instead.
+Of course, this only works, if the IP addresses are static.}
 
 \item{retry}{integer, the number of times to retry sending the ARP request.
 Using more retries leads to a more reliable detection of hosts, but also
