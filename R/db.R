@@ -183,6 +183,103 @@ read_netscanr_db <- function(file, start = NULL, end = NULL, tz = "") {
 }
 
 
+#' Update netscanR SQLite Database
+#'
+#' Update the descriptions in a netscanR SQLite database using a device list.
+#'
+#' @param file path to the SQLite database.
+#' @param device_list_file path to a csv file with a list of devices
+#' (see [`read_device_list()`]).
+#' @param update_known logical. Should also the descriptions of known devices
+#' be updated? By default, only devices that were not known at the time the
+#' database was written, i.e., that were not in the device list used at that
+#' moment, will be updated. Setting this to `TRUE` will update the descriptions
+#' of all appearances of a device in the database.
+#'
+#' @details
+#' This function rewrites the description of unknown devices in a netscanR
+#' SQLite database. This can be used to retrospectively mark devices as known
+#' and add a description to them.
+#'
+#' By setting `update_known = TRUE`, it can also update existing descriptions
+#' of known devices to a new value.
+#'
+#' Note that this reads and writes the entire database such that it may be slow
+#' for large databases.
+#'
+#' @return
+#' a data frame with the devices for which the description was updated for at
+#' least one timestamp. As a side effect, the database is updated.
+#'
+#'
+#' @export
+
+update_netscanr_db <- function(file,
+                               device_list_file,
+                               update_known = FALSE) {
+
+  db <- read_netscanr_db(file)
+  device_list <- read_device_list(device_list_file) %>%
+    dplyr::select("mac", new_description = "description")
+
+  # join the candidate new description to the database
+  db_updated <- db %>%
+    dplyr::left_join(device_list, by = "mac")
+
+  # updating the description depends on whether ALL descriptions must be updated
+  # or only those of unknown devices
+  if (update_known) {
+    updated_devices <- db_updated %>%
+      dplyr::filter(
+        .data$new_description != .data$description |
+          (is.na(.data$description) & !is.na(.data$new_description))
+      ) %>%
+      dplyr::distinct(.data$mac, .data$known_device, .data$description,
+                      .data$new_description)
+    db_updated <- db_updated %>%
+      dplyr::mutate(
+        description = dplyr::coalesce(.data$new_description, .data$description))
+  } else {
+    updated_devices <- db_updated %>%
+      dplyr::filter(
+        !.data$known_device,
+        .data$new_description != .data$description |
+          (is.na(.data$description) & !is.na(.data$new_description))
+      ) %>%
+      dplyr::distinct(.data$mac, .data$known_device, .data$description,
+                      .data$new_description)
+    db_updated <- db_updated %>%
+      dplyr::mutate(
+        description = dplyr::if_else(
+          .data$known_device,
+          .data$description,
+          dplyr::coalesce(.data$new_description, .data$description)
+        )
+      )
+  }
+
+
+  db_updated <- db_updated %>%
+    dplyr::select(-"new_description") %>%
+    # all devices that have been updated are now known
+    dplyr::mutate(
+      known_device = dplyr::if_else(
+          .data$mac %in% updated_devices$mac,
+          TRUE,
+          .data$known_device
+        )
+    )
+
+  # recreate the database
+  con <- connect_netscanr_db(file)
+  withr::defer(RSQLite::dbDisconnect(con))
+  RSQLite::dbExecute(con, "DELETE FROM netscanr")
+  RSQLite::dbWriteTable(con, "netscanr", db_updated, append = TRUE)
+
+  updated_devices
+}
+
+
 # check that the table netscanr exists in the database
 
 check_netscanr_table <- function(con, file, error_call = rlang::caller_env()) {

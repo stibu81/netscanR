@@ -157,3 +157,98 @@ test_that("test reading and writing database", {
     })
   })
 })
+
+
+test_that("test update_netscanr_db() with unknown devices", {
+  with_tempfile("netscanr_db", fileext = ".sqlite", {
+    # create a netscanr db, where some devices have no description
+    create_netscanr_db(netscanr_db)
+    dev_list_file <- system.file("extdata", "device_list.csv", package = "netscanR")
+    arp_scan_table <- get_arp_scan_ref()
+    arp_scan_table$known_device[c(2, 8)] <- FALSE
+    arp_scan_table$description[c(2, 8)] <- NA_character_
+    ts <- ymd_hms(c("2024-03-07 10:00:00", "2024-06-12 07:00:00"),
+                  tz = Sys.timezone())
+    write_netscanr_db(arp_scan_table, netscanr_db, ts[1])
+    write_netscanr_db(arp_scan_table, netscanr_db, ts[2])
+
+    # check db state before changing it
+    expect_equal(
+      read_netscanr_db(netscanr_db),
+      bind_rows(
+        arp_scan_table %>% mutate(timestamp = ts[1], .before = 1),
+        arp_scan_table %>% mutate(timestamp = ts[2], .before = 1)
+      )
+    )
+
+    # update database
+    update_ref <- arp_scan_table %>%
+        slice(c(2, 8)) %>%
+        select(mac, known_device, description) %>%
+        mutate(new_description = get_arp_scan_ref()$description[c(2, 8)])
+    expect_equal(update_netscanr_db(netscanr_db, dev_list_file), update_ref)
+
+    # read database
+    db_ref <- bind_rows(
+        get_arp_scan_ref() %>% mutate(timestamp = ts[1], .before = 1),
+        get_arp_scan_ref() %>% mutate(timestamp = ts[2], .before = 1)
+      )
+    expect_equal(read_netscanr_db(netscanr_db), db_ref)
+
+    # updating again does not change anything
+    expect_equal(
+      update_netscanr_db(netscanr_db, dev_list_file),
+      update_ref[integer(0), ]
+    )
+    expect_equal(read_netscanr_db(netscanr_db), db_ref)
+  })
+})
+
+
+test_that("test update_netscanr_db() with all devices", {
+  with_tempfile("netscanr_db", fileext = ".sqlite", {
+    # create a netscanr db, where some devices have no description
+    create_netscanr_db(netscanr_db)
+    dev_list_file <- system.file("extdata", "device_list.csv", package = "netscanR")
+    arp_scan_table <- get_arp_scan_ref()
+    arp_scan_table$known_device[2] <- FALSE
+    arp_scan_table$description[c(2, 6, 8)] <- c(NA_character_, "Dev 1", "Dev 2")
+    ts <- ymd_hms(c("2024-03-07 10:00:00", "2024-06-12 07:00:00"),
+                  tz = Sys.timezone())
+    write_netscanr_db(arp_scan_table, netscanr_db, ts[1])
+    write_netscanr_db(arp_scan_table, netscanr_db, ts[2])
+
+    # check db state before changing it
+    expect_equal(
+      read_netscanr_db(netscanr_db),
+      bind_rows(
+        arp_scan_table %>% mutate(timestamp = ts[1], .before = 1),
+        arp_scan_table %>% mutate(timestamp = ts[2], .before = 1)
+      )
+    )
+
+    # update database
+    update_ref <- arp_scan_table %>%
+        slice(c(2, 6, 8)) %>%
+        select(mac, known_device, description) %>%
+        mutate(new_description = get_arp_scan_ref()$description[c(2, 6, 8)])
+    expect_equal(
+      update_netscanr_db(netscanr_db, dev_list_file, update_known = TRUE),
+      update_ref
+    )
+
+    # read database
+    db_ref <- bind_rows(
+        get_arp_scan_ref() %>% mutate(timestamp = ts[1], .before = 1),
+        get_arp_scan_ref() %>% mutate(timestamp = ts[2], .before = 1)
+      )
+    expect_equal(read_netscanr_db(netscanr_db), db_ref)
+
+    # updating again does not change anything
+    expect_equal(
+      update_netscanr_db(netscanr_db, dev_list_file, update_known = TRUE),
+      update_ref[integer(0), ]
+    )
+    expect_equal(read_netscanr_db(netscanr_db), db_ref)
+  })
+})
